@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Drag search&copy",
+  "version": "1.0.0",
+  "description": "Drag and drop to search or copy text.",
+  "permissions": [
+    "tabs",
+    "storage",
+    "scripting",
+    "clipboardWrite"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "superdrag.js"
+      ],
+      "run_at": "document_end"
+    }
+  ]
+}
