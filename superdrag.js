@@ -1,7 +1,26 @@
 (function () {
     let dragStartPoint = null;
     let currentDirection = null;
+    let dragStartTime = null;
+    let hasTextSelection = false;
+    let isFromInteractiveElement = false;
     const THRESHOLD = 4;
+    const MIN_DRAG_DURATION = 150; // テキスト選択なしでリンク/ボタンからドラッグする場合の最小時間(ms)
+
+    // リンクやボタンなどのインタラクティブ要素かどうかを判定
+    function isInteractive(element) {
+        if (!element || element.nodeType !== 1) return false;
+        // リンク（hrefを持つaタグ）
+        if (element.tagName === 'A' && element.href) return true;
+        // ボタン
+        if (element.tagName === 'BUTTON') return true;
+        // role="button"を持つ要素
+        if (element.getAttribute && element.getAttribute('role') === 'button') return true;
+        // 親要素がインタラクティブ要素の場合もチェック
+        const interactiveParent = element.closest('a[href], button, [role="button"]');
+        if (interactiveParent) return true;
+        return false;
+    }
 
     function getDirection(p1, p2) {
         const dx = p2.x - p1.x;
@@ -20,9 +39,9 @@
         toast.style.position = 'fixed';
         toast.style.left = x + 'px';
         toast.style.top = y + 'px';
-        toast.style.backgroundColor = 'black';
+        toast.style.background = 'rgba(0, 0, 0, 0.7)';
         toast.style.color = 'white';
-        toast.style.padding = '5px 10px';
+        toast.style.padding = '4px 8px';
         toast.style.borderRadius = '4px';
         toast.style.zIndex = '2147483647';
         toast.style.pointerEvents = 'none';
@@ -31,7 +50,7 @@
         document.body.appendChild(toast);
         setTimeout(() => {
             if (toast.parentNode) toast.parentNode.removeChild(toast);
-        }, 100);
+        }, 200);
     }
 
     function handleDragStart(e) {
@@ -39,6 +58,7 @@
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
 
         const selection = window.getSelection().toString();
+        hasTextSelection = !!selection;
         let data = selection;
         if (!data && e.target.href) {
             data = e.target.href;
@@ -46,8 +66,12 @@
 
         if (!data) return;
 
+        // インタラクティブ要素からのドラッグかどうかを記録
+        isFromInteractiveElement = isInteractive(e.target);
+
         e.dataTransfer.setData('text/plain', data);
         dragStartPoint = { x: e.clientX, y: e.clientY };
+        dragStartTime = Date.now();
         currentDirection = null;
     }
 
@@ -64,6 +88,9 @@
     function handleDragEnd(e) {
         dragStartPoint = null;
         currentDirection = null;
+        dragStartTime = null;
+        hasTextSelection = false;
+        isFromInteractiveElement = false;
     }
 
     async function handleDrop(e) {
@@ -73,7 +100,25 @@
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             dragStartPoint = null;
             currentDirection = null;
+            dragStartTime = null;
+            hasTextSelection = false;
+            isFromInteractiveElement = false;
             return;
+        }
+
+        // テキスト選択がなく、リンク/ボタンからのドラッグの場合、時間をチェック
+        // 短すぎるドラッグは誤クリックとみなして無視
+        if (!hasTextSelection && isFromInteractiveElement && dragStartTime) {
+            const dragDuration = Date.now() - dragStartTime;
+            if (dragDuration < MIN_DRAG_DURATION) {
+                // 誤クリック防止: 時間が短すぎるので無視
+                dragStartPoint = null;
+                currentDirection = null;
+                dragStartTime = null;
+                hasTextSelection = false;
+                isFromInteractiveElement = false;
+                return;
+            }
         }
 
         e.preventDefault();
@@ -85,6 +130,9 @@
         // Cleanup
         dragStartPoint = null;
         currentDirection = null;
+        dragStartTime = null;
+        hasTextSelection = false;
+        isFromInteractiveElement = false;
 
         if (!data || !direction) return;
 
@@ -92,7 +140,7 @@
             // Copy
             try {
                 await navigator.clipboard.writeText(data);
-                showToast(e.clientX, e.clientY, 'コピー');
+                showToast(e.clientX, e.clientY, 'COPY');
             } catch (err) {
                 // Fallback
                 const textarea = document.createElement('textarea');
@@ -103,7 +151,7 @@
                 textarea.select();
                 try {
                     document.execCommand('copy');
-                    showToast(e.clientX, e.clientY, 'コピー');
+                    showToast(e.clientX, e.clientY, 'COPY');
                 } catch (fallbackErr) {
                     console.error('Copy failed', fallbackErr);
                 }
@@ -115,8 +163,7 @@
                 try {
                     chrome.runtime.sendMessage({
                         c: encodeURIComponent(data),
-                        direction: direction,
-                        foregroundOverride: e.shiftKey
+                        direction: direction
                     }, (response) => {
                         if (chrome.runtime.lastError) {
                             console.error(chrome.runtime.lastError);
