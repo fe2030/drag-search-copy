@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drag search&copy - 設定</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 40px 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      font-size: 24px;
+      margin: 0 0 10px 0;
+      color: #222;
+    }
+    .description {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 30px;
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin: 25px 0 15px 0;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #4a90d9;
+    }
+    .section-title:first-of-type {
+      margin-top: 0;
+    }
+    .section-description {
+      font-size: 13px;
+      color: #888;
+      margin: -10px 0 15px 0;
+    }
+    .setting-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .setting-item label {
+      width: 140px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    .setting-item select {
+      flex: 1;
+      padding: 10px 12px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: #fff;
+      cursor: pointer;
+    }
+    .setting-item select:focus {
+      outline: none;
+      border-color: #4a90d9;
+      box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.2);
+    }
+    .button-container {
+      margin-top: 30px;
+      text-align: center;
+    }
+    #saveButton {
+      background-color: #4a90d9;
+      color: #fff;
+      border: none;
+      padding: 12px 40px;
+      font-size: 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    #saveButton:hover {
+      background-color: #3a7bc8;
+    }
+    #saveButton:active {
+      background-color: #2d6cb5;
+    }
+    #statusMessage {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #28a745;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    #statusMessage.visible {
+      opacity: 1;
+    }
+    .optgroup-label {
+      font-weight: bold;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Drag search&copy 設定</h1>
+    <p class="description">ドラッグ方向ごとに実行するアクションを選択してください。</p>
+
+    <div class="section-title">通常のドラッグ</div>
+
+    <div class="setting-item">
+      <label for="upAction">↑ 上方向:</label>
+      <select id="upAction">
+        <option value="none">なし（何もしない）</option>
+        <optgroup label="検索">
+          <option value="google">Google 検索</option>
+          <option value="youtube">YouTube 検索</option>
+          <option value="twitter">X (Twitter) 検索</option>
+          <option value="rakuten">楽天検索</option>
+          <option value="amazon">Amazon 検索</option>
+          <option value="maps">Google マップ</option>
+        </optgroup>
+        <optgroup label="翻訳">
+          <option value="deepl">DeepL 翻訳</option>
+          <option value="gtranslate">Google 翻訳</option>
+        </optgroup>
+        <optgroup label="AI（入力欄に自動入力）">
+          <option value="chatgpt">ChatGPT</option>
+          <option value="claude">Claude</option>
+          <option value="gemini">Gemini</option>
+        </optgroup>
+        <optgroup label="その他">
+          <option value="copy">クリップボードにコピー</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div class="setting-item">
+      <label for="downAction">↓ 下方向:</label>
+      <select id="downAction">
+        <option value="none">なし（何もしない）</option>
+        <optgroup label="検索">
+          <option value="google">Google 検索</option>
+          <option value="youtube">YouTube 検索</option>
+          <option value="twitter">X (Twitter) 検索</option>
+          <option value="rakuten">楽天検索</option>
+          <option value="amazon">Amazon 検索</option>
+          <option value="maps">Google マップ</option>
+        </optgroup>
+        <optgroup label="翻訳">
+          <option value="deepl">DeepL 翻訳</option>
+          <option value="gtranslate">Google 翻訳</option>
+        </optgroup>
+        <optgroup label="AI（入力欄に自動入力）">
+          <option value="chatgpt">ChatGPT</option>
+          <option value="claude">Claude</option>
+          <option value="gemini">Gemini</option>
+        </optgroup>
+        <optgroup label="その他">
+          <option value="copy">クリップボードにコピー</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div class="setting-item">
+      <label for="leftAction">← 左方向:</label>
+      <select id="leftAction">
+        <option value="none">なし（何もしない）</option>
+        <optgroup label="検索">
+          <option value="google">Google 検索</option>
+          <option value="youtube">YouTube 検索</option>
+          <option value="twitter">X (Twitter) 検索</option>
+          <option value="rakuten">楽天検索</option>
+          <option value="amazon">Amazon 検索</option>
+          <option value="maps">Google マップ</option>
+        </optgroup>
+        <optgroup label="翻訳">
+          <option value="deepl">DeepL 翻訳</option>
+          <option value="gtranslate">Google 翻訳</option>
+        </optgroup>
+        <optgroup label="AI（入力欄に自動入力）">
+          <option value="chatgpt">ChatGPT</option>
+          <option value="claude">Claude</option>
+          <option value="gemini">Gemini</option>
+        </optgroup>
+        <optgroup label="その他">
+          <option value="copy">クリップボードにコピー</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div class="setting-item">
+      <label for="rightAction">→ 右方向:</label>
+      <select id="rightAction">
+        <option value="none">なし（何もしない）</option>
+        <optgroup label="検索">
+          <option value="google">Google 検索</option>
+          <option value="youtube">YouTube 検索</option>
+          <option value="twitter">X (Twitter) 検索</option>
+          <option value="rakuten">楽天検索</option>
+          <option value="amazon">Amazon 検索</option>
+          <option value="maps">Google マップ</option>
+        </optgroup>
+        <optgroup label="翻訳">
+          <option value="deepl">DeepL 翻訳</option>
+          <option value="gtranslate">Google 翻訳</option>
+        </optgroup>
+        <optgroup label="AI（入力欄に自動入力）">
+          <option value="chatgpt">ChatGPT</option>
+          <option value="claude">Claude</option>
+          <option value="gemini">Gemini</option>
+        </optgroup>
+        <optgroup label="その他">
+          <option value="copy">クリップボードにコピー</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div class="section-title">大きくドラッグ（80px以上）</div>
+    <p class="section-description">大きく動かした場合に別のアクションを実行できます。</p>
+
+    <div class="setting-item">
+      <label for="upFarAction">↑↑ 上方向（大）:</label>
+      <select id="upFarAction">
+        <option value="none">なし（何もしない）</option>
+        <optgroup label="検索">
+          <option value="google">Google 検索</option>
+          <option value="youtube">YouTube 検索</option>
+          <option value="twitter">X (Twitter) 検索</option>
+          <option value="rakuten">楽天検索</option>
+          <option value="amazon">Amazon 検索</option>
+          <option value="maps">Google マップ</option>
+        </optgroup>
+        <optgroup label="翻訳">
+          <option value="deepl">DeepL 翻訳</option>
+          <option value="gtranslate">Google 翻訳</option>
+        </optgroup>
+        <optgroup label="AI（入力欄に自動入力）">
+          <option value="chatgpt">ChatGPT</option>
+          <option value="claude">Claude</option>
+          <option value="gemini">Gemini</option>
+        </optgroup>
+        <optgroup label="その他">
+          <option value="copy">クリップボードにコピー</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div class="setting-item">
+      <label for="downFarAction">↓↓ 下方向（大）:</label>
+      <select id="downFarAction">
+        <option value="none">なし（何もしない）</option>
+        <optgroup label="検索">
+          <option value="google">Google 検索</option>
+          <option value="youtube">YouTube 検索</option>
+          <option value="twitter">X (Twitter) 検索</option>
+          <option value="rakuten">楽天検索</option>
+          <option value="amazon">Amazon 検索</option>
+          <option value="maps">Google マップ</option>
+        </optgroup>
+        <optgroup label="翻訳">
+          <option value="deepl">DeepL 翻訳</option>
+          <option value="gtranslate">Google 翻訳</option>
+        </optgroup>
+        <optgroup label="AI（入力欄に自動入力）">
+          <option value="chatgpt">ChatGPT</option>
+          <option value="claude">Claude</option>
+          <option value="gemini">Gemini</option>
+        </optgroup>
+        <optgroup label="その他">
+          <option value="copy">クリップボードにコピー</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div class="setting-item">
+      <label for="leftFarAction">←← 左方向（大）:</label>
+      <select id="leftFarAction">
+        <option value="none">なし（何もしない）</option>
+        <optgroup label="検索">
+          <option value="google">Google 検索</option>
+          <option value="youtube">YouTube 検索</option>
+          <option value="twitter">X (Twitter) 検索</option>
+          <option value="rakuten">楽天検索</option>
+          <option value="amazon">Amazon 検索</option>
+          <option value="maps">Google マップ</option>
+        </optgroup>
+        <optgroup label="翻訳">
+          <option value="deepl">DeepL 翻訳</option>
+          <option value="gtranslate">Google 翻訳</option>
+        </optgroup>
+        <optgroup label="AI（入力欄に自動入力）">
+          <option value="chatgpt">ChatGPT</option>
+          <option value="claude">Claude</option>
+          <option value="gemini">Gemini</option>
+        </optgroup>
+        <optgroup label="その他">
+          <option value="copy">クリップボードにコピー</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div class="setting-item">
+      <label for="rightFarAction">→→ 右方向（大）:</label>
+      <select id="rightFarAction">
+        <option value="none">なし（何もしない）</option>
+        <optgroup label="検索">
+          <option value="google">Google 検索</option>
+          <option value="youtube">YouTube 検索</option>
+          <option value="twitter">X (Twitter) 検索</option>
+          <option value="rakuten">楽天検索</option>
+          <option value="amazon">Amazon 検索</option>
+          <option value="maps">Google マップ</option>
+        </optgroup>
+        <optgroup label="翻訳">
+          <option value="deepl">DeepL 翻訳</option>
+          <option value="gtranslate">Google 翻訳</option>
+        </optgroup>
+        <optgroup label="AI（入力欄に自動入力）">
+          <option value="chatgpt">ChatGPT</option>
+          <option value="claude">Claude</option>
+          <option value="gemini">Gemini</option>
+        </optgroup>
+        <optgroup label="その他">
+          <option value="copy">クリップボードにコピー</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div class="button-container">
+      <button id="saveButton">保存</button>
+      <div id="statusMessage">保存しました</div>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
