@@ -79,6 +79,10 @@ function applySettingsToUI(settings) {
     toggleFarDragSection(true);
     // 3回クリックは既に使用済みとしてマーク
     tripleClickUsed = true;
+    // カーソルを通常に戻す
+    if (dragToggle) {
+      dragToggle.style.cursor = 'default';
+    }
   } else {
     // セクションを非表示
     toggleFarDragSection(false);
@@ -214,6 +218,11 @@ if (dragToggle) {
         // セクションを表示して有効化
         toggleFarDragSection(true);
         tripleClickUsed = true;
+        
+        // カーソルを通常に戻す
+        if (dragToggle) {
+          dragToggle.style.cursor = 'default';
+        }
         
         // 設定を保存
         chrome.storage.sync.get(DEFAULT_SETTINGS, (settings) => {
