@@ -44,7 +44,6 @@ const AI_SERVICES = {
 // メッセージリスナー
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   try {
-    // 新しいメッセージ形式: { type: 'search', engineId: string, text: string }
     if (!message || message.type !== 'search') return;
 
     const { engineId, text } = message;
@@ -155,8 +154,7 @@ function injectAutofillScript(tabId, text, selectors) {
                 element.dispatchEvent(new Event('input', { bubbles: true }));
                 element.dispatchEvent(new Event('change', { bubbles: true }));
               } else if (element.contentEditable === 'true') {
-                // contentEditable の場合、より確実に入力
-                element.innerHTML = '';
+                // contentEditable の場合: textContentのみを使用（XSS対策）
                 element.textContent = text;
                 
                 // 複数のイベントを発火させて確実に検知させる
