@@ -4,7 +4,7 @@
         // 通常のドラッグ
         up: 'google',
         down: 'twitter',
-        left: 'youtube',
+        left: 'amazon',
         right: 'copy',
         // 大きくドラッグ
         upFar: 'none',

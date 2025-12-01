@@ -12,7 +12,7 @@ Manifest V3 に準拠し、シンプルかつ高速に動作します。
 
 *   **上 (Up):** Google 検索
 *   **下 (Down):** X (Twitter) 検索
-*   **左 (Left):** YouTube 検索
+*   **左 (Left):** Amazon 検索
 *   **右 (Right):** テキストをクリップボードにコピー（「COPY」ポップアップ表示）
 
 ### 選択可能な機能一覧
