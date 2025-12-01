@@ -107,11 +107,34 @@
       font-weight: bold;
       color: #666;
     }
+    .far-drag-section {
+      display: none !important;
+    }
+    .far-drag-section.visible {
+      display: block !important;
+    }
+    .setting-item.far-drag-section.visible {
+      display: flex !important;
+    }
+    .far-drag-section.disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    .far-drag-checkbox {
+      margin-left: 10px;
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    .section-title.far-drag-section.visible {
+      display: flex;
+      align-items: center;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Drag search&copy 設定</h1>
+    <h1><span id="dragToggle" style="cursor: pointer;">Drag</span> search&copy 設定</h1>
     <p class="description">ドラッグ方向ごとに実行するアクションを選択してください。</p>
 
     <div class="section-title">通常のドラッグ</div>
@@ -224,10 +247,13 @@
       </select>
     </div>
 
-    <div class="section-title">大きくドラッグ（80px以上）</div>
-    <p class="section-description">大きく動かした場合に別のアクションを実行できます。</p>
+    <div class="section-title far-drag-section">
+      大きくドラッグ（100px以上（約2.6cm））
+      <input type="checkbox" id="farDragCheckbox" class="far-drag-checkbox">
+    </div>
+    <p class="section-description far-drag-section">大きく動かした場合に別のアクションを実行できます。</p>
 
-    <div class="setting-item">
+    <div class="setting-item far-drag-section">
       <label for="upFarAction">↑↑ 上方向（大）:</label>
       <select id="upFarAction">
         <option value="none">なし（何もしない）</option>
@@ -254,7 +280,7 @@
       </select>
     </div>
 
-    <div class="setting-item">
+    <div class="setting-item far-drag-section">
       <label for="downFarAction">↓↓ 下方向（大）:</label>
       <select id="downFarAction">
         <option value="none">なし（何もしない）</option>
@@ -281,7 +307,7 @@
       </select>
     </div>
 
-    <div class="setting-item">
+    <div class="setting-item far-drag-section">
       <label for="leftFarAction">←← 左方向（大）:</label>
       <select id="leftFarAction">
         <option value="none">なし（何もしない）</option>
@@ -308,7 +334,7 @@
       </select>
     </div>
 
-    <div class="setting-item">
+    <div class="setting-item far-drag-section">
       <label for="rightFarAction">→→ 右方向（大）:</label>
       <select id="rightFarAction">
         <option value="none">なし（何もしない）</option>

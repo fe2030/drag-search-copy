@@ -10,7 +10,9 @@
         upFar: 'none',
         downFar: 'none',
         leftFar: 'none',
-        rightFar: 'none'
+        rightFar: 'none',
+        // 大きくドラッグ機能のオン/オフ
+        farDragEnabled: false
     };
 
     // 現在の設定（初期値はデフォルト）
@@ -25,7 +27,7 @@
 
     // 定数
     const THRESHOLD = 4;           // 方向判定の最小閾値（px）
-    const FAR_THRESHOLD = 80;      // 「大きく動かす」の閾値（px）
+    const FAR_THRESHOLD = 100;     // 「大きく動かす」の閾値（px）
     const MIN_DRAG_DURATION = 150; // テキスト選択なしでリンク/ボタンからドラッグする場合の最小時間(ms)
 
     // 設定を読み込む
@@ -251,7 +253,21 @@
         // ドロップ時点での距離を計算
         const dropPoint = { x: dropX, y: dropY };
         const distance = getDistance(dragStartPoint, dropPoint);
-        const isFar = distance >= FAR_THRESHOLD;
+        
+        // 大きくドラッグ機能が有効で、距離が閾値を超えている場合
+        let isFar = settings.farDragEnabled && distance >= FAR_THRESHOLD;
+
+        // 大きくドラッグが有効な場合、その方向の設定が「none」かどうかを確認
+        if (isFar) {
+            const farSettingsKey = getSettingsKey(direction, true);
+            if (farSettingsKey) {
+                const farEngineId = settings[farSettingsKey] || DEFAULT_SETTINGS[farSettingsKey];
+                // 大きくドラッグの設定が「none」の場合は通常のドラッグを使用
+                if (farEngineId === 'none') {
+                    isFar = false;
+                }
+            }
+        }
 
         // 状態をリセット
         resetState();
