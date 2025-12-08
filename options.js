@@ -139,12 +139,19 @@ function toggleFarDragSection(enabled) {
   }
 
   farDragSections.forEach(section => {
+    // select要素を取得
+    const selects = section.querySelectorAll('select');
+
     if (enabled) {
       section.classList.add('visible');
       section.classList.remove('disabled');
+      // select要素を有効化
+      selects.forEach(select => select.disabled = false);
     } else {
       section.classList.remove('visible');
       section.classList.add('disabled');
+      // select要素を無効化
+      selects.forEach(select => select.disabled = true);
     }
   });
 
