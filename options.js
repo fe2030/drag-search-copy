@@ -40,7 +40,7 @@ function loadSettings() {
   if (!farDragSections) {
     farDragSections = document.querySelectorAll('.far-drag-section');
   }
-  
+
   try {
     chrome.storage.sync.get(DEFAULT_SETTINGS, (settings) => {
       if (chrome.runtime.lastError) {
@@ -64,16 +64,16 @@ function applySettingsToUI(settings) {
   downSelect.value = settings.down || DEFAULT_SETTINGS.down;
   leftSelect.value = settings.left || DEFAULT_SETTINGS.left;
   rightSelect.value = settings.right || DEFAULT_SETTINGS.right;
-  
+
   // 大きくドラッグ
   upFarSelect.value = settings.upFar || DEFAULT_SETTINGS.upFar;
   downFarSelect.value = settings.downFar || DEFAULT_SETTINGS.downFar;
   leftFarSelect.value = settings.leftFar || DEFAULT_SETTINGS.leftFar;
   rightFarSelect.value = settings.rightFar || DEFAULT_SETTINGS.rightFar;
-  
+
   // 大きくドラッグ機能のオン/オフ状態を反映
   const farDragEnabled = settings.farDragEnabled !== undefined ? settings.farDragEnabled : DEFAULT_SETTINGS.farDragEnabled;
-  
+
   if (farDragEnabled) {
     // セクションを表示
     toggleFarDragSection(true);
@@ -137,7 +137,7 @@ function toggleFarDragSection(enabled) {
   if (!farDragSections) {
     farDragSections = document.querySelectorAll('.far-drag-section');
   }
-  
+
   farDragSections.forEach(section => {
     if (enabled) {
       section.classList.add('visible');
@@ -147,7 +147,7 @@ function toggleFarDragSection(enabled) {
       section.classList.add('disabled');
     }
   });
-  
+
   // チェックボックスの状態を更新
   if (farDragCheckbox) {
     farDragCheckbox.checked = enabled;
@@ -159,7 +159,7 @@ function setFarDragSectionEnabled(enabled) {
   if (!farDragSections) {
     farDragSections = document.querySelectorAll('.far-drag-section');
   }
-  
+
   // セクションが表示されている場合のみ有効/無効を切り替え
   farDragSections.forEach(section => {
     if (section.classList.contains('visible')) {
@@ -176,7 +176,7 @@ function setFarDragSectionEnabled(enabled) {
       }
     }
   });
-  
+
   // チェックボックスの状態を更新
   if (farDragCheckbox) {
     farDragCheckbox.checked = enabled;
@@ -204,26 +204,26 @@ if (dragToggle) {
     if (tripleClickUsed) {
       return;
     }
-    
+
     clickCount++;
-    
+
     // タイマーをリセット
     if (clickTimer) {
       clearTimeout(clickTimer);
     }
-    
+
     // 3回クリックを検出（500ms以内）
     clickTimer = setTimeout(() => {
       if (clickCount === 3) {
         // セクションを表示して有効化
         toggleFarDragSection(true);
         tripleClickUsed = true;
-        
+
         // カーソルを通常に戻す
         if (dragToggle) {
           dragToggle.style.cursor = 'default';
         }
-        
+
         // 設定を保存
         chrome.storage.sync.get(DEFAULT_SETTINGS, (settings) => {
           const updatedSettings = { ...settings, farDragEnabled: true };
@@ -246,13 +246,13 @@ document.addEventListener('DOMContentLoaded', () => {
     farDragSections = document.querySelectorAll('.far-drag-section');
   }
   toggleFarDragSection(false);
-  
+
   // チェックボックスのイベントリスナー
   if (farDragCheckbox) {
     farDragCheckbox.addEventListener('change', (e) => {
       const enabled = e.target.checked;
       setFarDragSectionEnabled(enabled);
-      
+
       // 設定を保存
       chrome.storage.sync.get(DEFAULT_SETTINGS, (settings) => {
         const updatedSettings = { ...settings, farDragEnabled: enabled };
@@ -264,10 +264,10 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
-  
+
   // 設定を読み込む
   loadSettings();
-  
+
   // 設定読み込み後に3回クリックの使用状態を確認
   chrome.storage.sync.get(DEFAULT_SETTINGS, (settings) => {
     if (settings.farDragEnabled) {
@@ -278,4 +278,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
 if (saveButton) {
   saveButton.addEventListener('click', saveSettings);
+}
+
+// リセットボタンの要素
+const resetButton = document.getElementById('resetButton');
+
+// デフォルト設定にリセット
+function resetToDefault() {
+  try {
+    chrome.storage.sync.set(DEFAULT_SETTINGS, () => {
+      if (chrome.runtime.lastError) {
+        console.error('設定のリセットに失敗:', chrome.runtime.lastError);
+        showStatus('リセットに失敗しました', true);
+        return;
+      }
+      // UI にデフォルト設定を適用
+      applySettingsToUI(DEFAULT_SETTINGS);
+      // 3回クリックの状態もリセット
+      tripleClickUsed = false;
+      if (dragToggle) {
+        dragToggle.style.cursor = 'pointer';
+      }
+      showStatus('デフォルトに戻しました', false);
+    });
+  } catch (e) {
+    console.error('設定のリセット中にエラー:', e);
+    showStatus('リセットに失敗しました', true);
+  }
+}
+
+if (resetButton) {
+  resetButton.addEventListener('click', resetToDefault);
 }
