@@ -1,3 +1,33 @@
+// デフォルト設定（options.js, superdrag.js と同期）
+const DEFAULT_SETTINGS = {
+  // 通常のドラッグ
+  up: 'google',
+  down: 'twitter',
+  left: 'amazon',
+  right: 'copy',
+  // 大きくドラッグ
+  upFar: 'none',
+  downFar: 'none',
+  leftFar: 'none',
+  rightFar: 'none',
+  // 大きくドラッグ機能のオン/オフ
+  farDragEnabled: false
+};
+
+// インストール時の初期化処理
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === 'install') {
+    // 初回インストール時にデフォルト設定を書き込む
+    chrome.storage.sync.set(DEFAULT_SETTINGS, () => {
+      if (chrome.runtime.lastError) {
+        console.error('[ServiceWorker] ERROR: Failed to initialize settings:', chrome.runtime.lastError);
+      } else {
+        console.log('[ServiceWorker] INFO: Default settings initialized');
+      }
+    });
+  }
+});
+
 // URLテンプレート定義（%s がクエリに置換される）
 const URL_TEMPLATES = {
   google: 'https://www.google.com/search?q=%s',
@@ -44,7 +74,6 @@ const AI_SERVICES = {
 // メッセージリスナー
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   try {
-    // 新しいメッセージ形式: { type: 'search', engineId: string, text: string }
     if (!message || message.type !== 'search') return;
 
     const { engineId, text } = message;
@@ -112,21 +141,21 @@ function handleAIService(engineId, text) {
 
       // タブの読み込み完了を待ってスクリプトを注入
       const tabId = tab.id;
-      
+
       // タブの更新を監視
       const listener = (updatedTabId, changeInfo) => {
         if (updatedTabId === tabId && changeInfo.status === 'complete') {
           chrome.tabs.onUpdated.removeListener(listener);
-          
+
           // 少し待ってからスクリプトを注入（ページのJSが完全に初期化されるのを待つ）
           setTimeout(() => {
             injectAutofillScript(tabId, text, service.selectors);
           }, 500);
         }
       };
-      
+
       chrome.tabs.onUpdated.addListener(listener);
-      
+
       // タイムアウト処理（10秒後にリスナーを削除）
       setTimeout(() => {
         chrome.tabs.onUpdated.removeListener(listener);
@@ -143,45 +172,44 @@ function injectAutofillScript(tabId, text, selectors) {
       func: (text, selectors) => {
         let attempts = 0;
         const maxAttempts = 50;
-        
+
         function tryAutofill() {
           for (const selector of selectors) {
             const element = document.querySelector(selector);
             if (element) {
               element.focus();
-              
+
               if (element.tagName === 'TEXTAREA' || element.tagName === 'INPUT') {
                 element.value = text;
                 element.dispatchEvent(new Event('input', { bubbles: true }));
                 element.dispatchEvent(new Event('change', { bubbles: true }));
               } else if (element.contentEditable === 'true') {
-                // contentEditable の場合、より確実に入力
-                element.innerHTML = '';
+                // contentEditable の場合: textContentのみを使用（XSS対策）
                 element.textContent = text;
-                
+
                 // 複数のイベントを発火させて確実に検知させる
-                element.dispatchEvent(new InputEvent('input', { 
-                  bubbles: true, 
+                element.dispatchEvent(new InputEvent('input', {
+                  bubbles: true,
                   cancelable: true,
                   inputType: 'insertText',
-                  data: text 
+                  data: text
                 }));
                 element.dispatchEvent(new Event('input', { bubbles: true }));
                 element.dispatchEvent(new Event('change', { bubbles: true }));
               }
-              
+
               console.log('Drag search&copy: Text autofilled successfully');
               return true;
             }
           }
           return false;
         }
-        
+
         function attemptAutofill() {
           if (tryAutofill()) {
             return;
           }
-          
+
           attempts++;
           if (attempts < maxAttempts) {
             setTimeout(attemptAutofill, 100);
@@ -189,7 +217,7 @@ function injectAutofillScript(tabId, text, selectors) {
             console.log('Drag search&copy: Could not find input element');
           }
         }
-        
+
         attemptAutofill();
       },
       args: [text, selectors]

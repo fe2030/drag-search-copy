@@ -4,13 +4,15 @@
         // 通常のドラッグ
         up: 'google',
         down: 'twitter',
-        left: 'youtube',
+        left: 'amazon',
         right: 'copy',
         // 大きくドラッグ
         upFar: 'none',
         downFar: 'none',
         leftFar: 'none',
-        rightFar: 'none'
+        rightFar: 'none',
+        // 大きくドラッグ機能のオン/オフ
+        farDragEnabled: false
     };
 
     // 現在の設定（初期値はデフォルト）
@@ -25,7 +27,7 @@
 
     // 定数
     const THRESHOLD = 4;           // 方向判定の最小閾値（px）
-    const FAR_THRESHOLD = 80;      // 「大きく動かす」の閾値（px）
+    const FAR_THRESHOLD = 100;     // 「大きく動かす」の閾値（px）
     const MIN_DRAG_DURATION = 150; // テキスト選択なしでリンク/ボタンからドラッグする場合の最小時間(ms)
 
     // 設定を読み込む
@@ -63,16 +65,18 @@
     // リンクやボタンなどのインタラクティブ要素かどうかを判定
     function isInteractive(element) {
         if (!element || element.nodeType !== 1) return false;
-        // リンク（hrefを持つaタグ）
         if (element.tagName === 'A' && element.href) return true;
-        // ボタン
         if (element.tagName === 'BUTTON') return true;
-        // role="button"を持つ要素
         if (element.getAttribute && element.getAttribute('role') === 'button') return true;
-        // 親要素がインタラクティブ要素の場合もチェック
         const interactiveParent = element.closest('a[href], button, [role="button"]');
         if (interactiveParent) return true;
         return false;
+    }
+
+    // 入力要素かどうかを判定
+    function isInputElement(element) {
+        if (!element || element.nodeType !== 1) return false;
+        return element.tagName === 'INPUT' || element.tagName === 'TEXTAREA' || element.isContentEditable;
     }
 
     // ドラッグ方向を判定（方向のみ）
@@ -126,13 +130,13 @@
         }, 200);
     }
 
-    // コピー処理を実行
+    // コピー処理を実行（navigator.clipboard.writeText優先、フォールバック付き）
     async function executeCopy(text, x, y) {
         try {
             await navigator.clipboard.writeText(text);
             showToast(x, y, 'COPY');
         } catch (err) {
-            // フォールバック
+            // フォールバック: execCommand('copy')
             const textarea = document.createElement('textarea');
             textarea.value = text;
             textarea.style.position = 'fixed';
@@ -161,10 +165,9 @@
                 type: 'search',
                 engineId: engineId,
                 text: text
-            }, (response) => {
-                if (chrome.runtime.lastError) {
-                    console.error('SendMessage error:', chrome.runtime.lastError);
-                }
+            }, () => {
+                // lastErrorを読み取って警告を抑制（service workerがsendResponseを呼ばないため）
+                void chrome.runtime.lastError;
             });
         } catch (err) {
             console.error('SendMessage failed:', err);
@@ -180,22 +183,24 @@
         isFromInteractiveElement = false;
     }
 
-    // ドラッグ開始ハンドラ
+    // ドラッグ開始ハンドラ（イベント委譲）
     function handleDragStart(e) {
+        const target = e.target;
+
         // INPUT, TEXTAREA, contentEditableを除外
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
+        if (isInputElement(target)) return;
 
         const selection = window.getSelection().toString();
         hasTextSelection = !!selection;
         let data = selection;
-        if (!data && e.target.href) {
-            data = e.target.href;
+        if (!data && target.href) {
+            data = target.href;
         }
 
         if (!data) return;
 
         // インタラクティブ要素からのドラッグかどうかを記録
-        isFromInteractiveElement = isInteractive(e.target);
+        isFromInteractiveElement = isInteractive(target);
 
         e.dataTransfer.setData('text/plain', data);
         dragStartPoint = { x: e.clientX, y: e.clientY };
@@ -203,23 +208,22 @@
         currentDirection = null;
     }
 
-    // ドラッグオーバーハンドラ
+    // ドラッグオーバーハンドラ（イベント委譲）
     function handleDragOver(e) {
         if (!dragStartPoint) return;
         e.preventDefault();
-        e.stopPropagation();
         e.dataTransfer.dropEffect = 'move';
 
         const currentPoint = { x: e.clientX, y: e.clientY };
         currentDirection = getDirection(dragStartPoint, currentPoint);
     }
 
-    // ドラッグ終了ハンドラ
+    // ドラッグ終了ハンドラ（イベント委譲）
     function handleDragEnd(e) {
         resetState();
     }
 
-    // ドロップハンドラ
+    // ドロップハンドラ（イベント委譲）
     async function handleDrop(e) {
         if (!dragStartPoint) return;
 
@@ -240,7 +244,6 @@
         }
 
         e.preventDefault();
-        e.stopPropagation();
 
         const direction = currentDirection;
         const data = e.dataTransfer.getData('text/plain');
@@ -250,7 +253,21 @@
         // ドロップ時点での距離を計算
         const dropPoint = { x: dropX, y: dropY };
         const distance = getDistance(dragStartPoint, dropPoint);
-        const isFar = distance >= FAR_THRESHOLD;
+        
+        // 大きくドラッグ機能が有効で、距離が閾値を超えている場合
+        let isFar = settings.farDragEnabled && distance >= FAR_THRESHOLD;
+
+        // 大きくドラッグが有効な場合、その方向の設定が「none」かどうかを確認
+        if (isFar) {
+            const farSettingsKey = getSettingsKey(direction, true);
+            if (farSettingsKey) {
+                const farEngineId = settings[farSettingsKey] || DEFAULT_SETTINGS[farSettingsKey];
+                // 大きくドラッグの設定が「none」の場合は通常のドラッグを使用
+                if (farEngineId === 'none') {
+                    isFar = false;
+                }
+            }
+        }
 
         // 状態をリセット
         resetState();
@@ -274,19 +291,6 @@
         }
     }
 
-    // 要素にイベントハンドラを適用
-    function applyHandlers(node) {
-        if (node.nodeType !== 1) return; // Element node only
-        // INPUT, TEXTAREA, contentEditableを除外
-        if (node.tagName === 'INPUT' || node.tagName === 'TEXTAREA' || node.isContentEditable) return;
-
-        // Using named functions prevents duplication
-        node.addEventListener('dragstart', handleDragStart);
-        node.addEventListener('dragover', handleDragOver);
-        node.addEventListener('drop', handleDrop);
-        node.addEventListener('dragend', handleDragEnd);
-    }
-
     // 初期化
     function init() {
         if (!document.body) {
@@ -300,22 +304,12 @@
         // 設定変更を監視
         watchSettingsChanges();
 
-        // 全ての要素にハンドラを適用
-        document.querySelectorAll('*').forEach(applyHandlers);
-
-        // DOM変更を監視
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                mutation.addedNodes.forEach((node) => {
-                    if (node.nodeType === 1) {
-                        applyHandlers(node);
-                        node.querySelectorAll('*').forEach(applyHandlers);
-                    }
-                });
-            });
-        });
-
-        observer.observe(document.body, { childList: true, subtree: true });
+        // イベント委譲: documentにのみイベントリスナーを登録
+        // これにより全要素への個別登録とMutationObserverが不要になる
+        document.addEventListener('dragstart', handleDragStart);
+        document.addEventListener('dragover', handleDragOver);
+        document.addEventListener('drop', handleDrop);
+        document.addEventListener('dragend', handleDragEnd);
     }
 
     init();
