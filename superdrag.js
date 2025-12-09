@@ -488,7 +488,7 @@
 
     // キーダウンハンドラ (Escキーで閉じる)
     function handleKeyDown(e) {
-        if (e.key === 'Escape') {
+        if (e.key === 'Escape' && guideOverlayHost) {
             guideManuallyHidden = true; // 手動で閉じたことを記録
             removeGuideOverlay();
         }
