@@ -1,38 +1,29 @@
 (function () {
     // デフォルト設定
     const DEFAULT_SETTINGS = {
-        // 通常のドラッグ
         up: 'google',
         down: 'twitter',
         left: 'amazon',
         right: 'copy',
-        // 大きくドラッグ
         upFar: 'none',
         downFar: 'none',
         leftFar: 'none',
         rightFar: 'none',
-        // 大きくドラッグ機能のオン/オフ
         farDragEnabled: false,
-        // 視覚ガイドのオン/オフ
         enableGuides: true
     };
 
-    // 現在の設定（初期値はデフォルト）
     let settings = { ...DEFAULT_SETTINGS };
-
-    // ドラッグ状態管理
     let dragStartPoint = null;
     let currentDirection = null;
     let dragStartTime = null;
     let hasTextSelection = false;
     let isFromInteractiveElement = false;
 
-    // 定数
     const THRESHOLD = 4;
     const FAR_THRESHOLD = 100;
     const MIN_DRAG_DURATION = 150;
 
-    // アクションの表示名マップ（絵文字アイコン付き）
     const ACTION_DISPLAY_NAMES = {
         'none': '',
         'google': '🔍 Google',
@@ -49,12 +40,10 @@
         'copy': '📋 Copy'
     };
 
-    // オーバーレイ要素の参照
     let guideOverlayHost = null;
     let guideOverlayRoot = null;
-    let guideManuallyHidden = false; // 手動で閉じたかどうかのフラグ
+    let guideManuallyHidden = false;
 
-    // 設定を読み込む
     function loadSettings() {
         try {
             chrome.storage.sync.get(DEFAULT_SETTINGS, (result) => {
@@ -65,7 +54,6 @@
         }
     }
 
-    // 設定の変更を監視
     function watchSettingsChanges() {
         try {
             chrome.storage.onChanged.addListener((changes, areaName) => {
@@ -87,8 +75,7 @@
         if (element.tagName === 'BUTTON') return true;
         if (element.getAttribute && element.getAttribute('role') === 'button') return true;
         const interactiveParent = element.closest('a[href], button, [role="button"]');
-        if (interactiveParent) return true;
-        return false;
+        return !!interactiveParent;
     }
 
     function isInputElement(element) {
@@ -142,13 +129,13 @@
         document.body.appendChild(toast);
         setTimeout(() => {
             if (toast.parentNode) toast.parentNode.removeChild(toast);
-        }, 200);
+        }, 350);
     }
 
     async function executeCopy(text, x, y) {
         try {
             await navigator.clipboard.writeText(text);
-            showToast(x, y, 'COPY');
+            showToast(x, y, '📋Copied!');
         } catch (err) {
             const textarea = document.createElement('textarea');
             textarea.value = text;
@@ -157,7 +144,7 @@
             textarea.select();
             try {
                 document.execCommand('copy');
-                showToast(x, y, 'COPY');
+                showToast(x, y, '📋Copied!');
             } catch (fallbackErr) {
                 console.error('Copy failed', fallbackErr);
             }
@@ -189,20 +176,16 @@
         dragStartTime = null;
         hasTextSelection = false;
         isFromInteractiveElement = false;
-        // ガイドオーバーレイは削除しない（選択が残っている限り表示を維持）
-        // removeGuideOverlay();
     }
 
     function createGuideOverlay(x, y) {
-        // ガイドが無効の場合は表示しない
         if (!settings.enableGuides) return;
-
         if (guideOverlayHost) return;
 
         guideOverlayHost = document.createElement('div');
         guideOverlayHost.id = 'superdrag-guide-overlay';
         guideOverlayHost.style.cssText = `
-            position: fixed !important;
+            position: absolute !important;
             top: 0 !important;
             left: 0 !important;
             width: 0 !important;
@@ -218,7 +201,7 @@
         const style = document.createElement('style');
         style.textContent = `
             .guide-container {
-                position: fixed;
+                position: absolute;
                 top: 0;
                 left: 0;
                 width: 100%;
@@ -291,22 +274,17 @@
         container.className = 'guide-container';
         guideOverlayRoot.appendChild(container);
 
-        // 閉じるボタンを作成 (中心から少し右上に配置)
         const closeBtn = document.createElement('div');
         closeBtn.className = 'guide-close';
-        closeBtn.innerHTML = '&#xd7;'; // × mark
+        closeBtn.innerHTML = '&#xd7;';
         closeBtn.title = 'Close Guide';
-        // 右上に配置 (Googleラベルの右側)
         closeBtn.style.left = (x + 70) + 'px';
         closeBtn.style.top = (y - 80) + 'px';
 
-        // Shadow DOM内なのでイベントは別途追加が必要だが、
-        // 親のpointer-events: noneを回避するためにCSSでautoにしている
-        // mousedownで閉じる（clickだとpreventDefaultと競合するため）
         closeBtn.addEventListener('mousedown', (e) => {
             e.stopPropagation();
-            e.preventDefault(); // 選択状態を維持
-            guideManuallyHidden = true; // 手動で閉じたことを記録
+            e.preventDefault();
+            guideManuallyHidden = true;
             removeGuideOverlay();
         });
 
@@ -446,8 +424,6 @@
 
     function handleMouseUp(e) {
         if (dragStartPoint) return;
-
-        // 手動で閉じた場合は再表示しない
         if (guideManuallyHidden) return;
 
         setTimeout(() => {
@@ -456,13 +432,14 @@
                 try {
                     const range = selection.getRangeAt(0);
                     const rect = range.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2;
+                    // ページ座標を使用（スクロール位置を加算）
+                    const centerX = rect.left + rect.width / 2 + window.scrollX;
+                    const centerY = rect.top + rect.height / 2 + window.scrollY;
                     removeGuideOverlay();
                     createGuideOverlay(centerX, centerY);
                 } catch (err) {
                     removeGuideOverlay();
-                    createGuideOverlay(e.clientX, e.clientY);
+                    createGuideOverlay(e.clientX + window.scrollX, e.clientY + window.scrollY);
                 }
             }
         }, 10);
@@ -482,14 +459,13 @@
         const selection = window.getSelection();
         if (!selection || selection.toString().length === 0) {
             removeGuideOverlay();
-            guideManuallyHidden = false; // 選択が解除されたらフラグをリセット
+            guideManuallyHidden = false;
         }
     }
 
-    // キーダウンハンドラ (Escキーで閉じる)
     function handleKeyDown(e) {
         if (e.key === 'Escape' && guideOverlayHost) {
-            guideManuallyHidden = true; // 手動で閉じたことを記録
+            guideManuallyHidden = true;
             removeGuideOverlay();
         }
     }
