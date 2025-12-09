@@ -11,7 +11,9 @@ const DEFAULT_SETTINGS = {
   leftFar: 'none',
   rightFar: 'none',
   // 大きくドラッグ機能のオン/オフ
-  farDragEnabled: false
+  farDragEnabled: false,
+  // 視覚ガイドのオン/オフ
+  enableGuides: true
 };
 
 // DOM要素 - 通常のドラッグ
@@ -31,6 +33,7 @@ const saveButton = document.getElementById('saveButton');
 const statusMessage = document.getElementById('statusMessage');
 const dragToggle = document.getElementById('dragToggle');
 const farDragCheckbox = document.getElementById('farDragCheckbox');
+const enableGuidesCheckbox = document.getElementById('enableGuidesCheckbox');
 let farDragSections = null;
 let tripleClickUsed = false; // 3回クリックが既に使用されたかどうか
 
@@ -87,6 +90,11 @@ function applySettingsToUI(settings) {
     // セクションを非表示
     toggleFarDragSection(false);
   }
+
+  // 視覚ガイドの状態を反映
+  if (enableGuidesCheckbox) {
+    enableGuidesCheckbox.checked = settings.enableGuides !== undefined ? settings.enableGuides : DEFAULT_SETTINGS.enableGuides;
+  }
 }
 
 // 設定を保存
@@ -103,7 +111,9 @@ function saveSettings() {
     leftFar: leftFarSelect.value,
     rightFar: rightFarSelect.value,
     // 大きくドラッグ機能のオン/オフ
-    farDragEnabled: getFarDragEnabled()
+    farDragEnabled: getFarDragEnabled(),
+    // 視覚ガイドのオン/オフ
+    enableGuides: enableGuidesCheckbox ? enableGuidesCheckbox.checked : DEFAULT_SETTINGS.enableGuides
   };
 
   try {
@@ -274,6 +284,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 設定を読み込む
   loadSettings();
+
+  // 視覚ガイドチェックボックスのイベントリスナー
+  if (enableGuidesCheckbox) {
+    enableGuidesCheckbox.addEventListener('change', (e) => {
+      const enabled = e.target.checked;
+      // 設定を即座に保存
+      chrome.storage.sync.get(DEFAULT_SETTINGS, (settings) => {
+        const updatedSettings = { ...settings, enableGuides: enabled };
+        chrome.storage.sync.set(updatedSettings, () => {
+          if (chrome.runtime.lastError) {
+            console.error('設定の保存に失敗:', chrome.runtime.lastError);
+          }
+        });
+      });
+    });
+  }
 
   // 設定読み込み後に3回クリックの使用状態を確認
   chrome.storage.sync.get(DEFAULT_SETTINGS, (settings) => {
