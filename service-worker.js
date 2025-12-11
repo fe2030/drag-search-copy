@@ -35,8 +35,9 @@ const URL_TEMPLATES = {
   twitter: 'https://x.com/search?q=%s',
   deepl: 'https://www.deepl.com/translator#en/ja/%s',
   gtranslate: 'https://translate.google.com/?sl=auto&tl=ja&text=%s',
-  amazon: 'https://www.amazon.co.jp/s?k=%s',
+  amazon: 'https://www.amazon.co.jp/s?k=%s', // default to jp, logic will override
   rakuten: 'https://search.rakuten.co.jp/search/mall/%s/',
+  reddit: 'https://www.reddit.com/search/?q=%s',
   maps: 'https://www.google.co.jp/maps?q=%s'
 };
 
@@ -100,10 +101,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 
     // 通常の検索エンジンの場合
-    const template = URL_TEMPLATES[engineId];
+    let template = URL_TEMPLATES[engineId];
     if (!template) {
       console.error('Unknown engineId:', engineId);
       return;
+    }
+
+    // Amazonのロケール対応
+    if (engineId === 'amazon') {
+      const uiLanguage = chrome.i18n.getUILanguage();
+      if (!uiLanguage.startsWith('ja')) {
+        template = 'https://www.amazon.com/s?k=%s';
+      }
     }
 
     // URLを生成（%sをエンコードされたテキストで置換）

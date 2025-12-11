@@ -188,18 +188,20 @@
 
 <body>
   <div class="container">
-    <h1><span id="dragToggle" style="cursor: pointer;">Drag</span> search&copy 設定</h1>
-    <p class="description">ドラッグ方向ごとに実行するアクションを選択してください。</p>
+    <h1><span id="dragToggle" style="cursor: pointer;">Drag</span><span data-i18n="settingsTitleSuffix"> search&copy
+        設定</span></h1>
+    <p class="description" data-i18n="settingsDesc">ドラッグ方向ごとに実行するアクションを選択してください。</p>
 
     <div class="setting-item" style="margin-bottom: 25px;">
-      <label for="enableGuidesCheckbox" style="width: auto; margin-right: 10px;">視覚ガイドを表示する:</label>
+      <label for="enableGuidesCheckbox" style="width: auto; margin-right: 10px;"
+        data-i18n="enableGuidesLabel">視覚ガイドを表示する:</label>
       <input type="checkbox" id="enableGuidesCheckbox" style="width: 18px; height: 18px; cursor: pointer;">
     </div>
 
-    <div class="section-title">通常のドラッグ</div>
+    <div class="section-title" data-i18n="normalDragTitle">通常のドラッグ</div>
 
     <div class="setting-item">
-      <label for="upAction">↑ 上方向:</label>
+      <label for="upAction" data-i18n="upAction">↑ 上方向:</label>
       <select id="upAction">
         <option value="none">なし（何もしない）</option>
         <optgroup label="検索">
@@ -226,7 +228,7 @@
     </div>
 
     <div class="setting-item">
-      <label for="downAction">↓ 下方向:</label>
+      <label for="downAction" data-i18n="downAction">↓ 下方向:</label>
       <select id="downAction">
         <option value="none">なし（何もしない）</option>
         <optgroup label="検索">
@@ -253,7 +255,7 @@
     </div>
 
     <div class="setting-item">
-      <label for="leftAction">← 左方向:</label>
+      <label for="leftAction" data-i18n="leftAction">← 左方向:</label>
       <select id="leftAction">
         <option value="none">なし（何もしない）</option>
         <optgroup label="検索">
@@ -280,7 +282,7 @@
     </div>
 
     <div class="setting-item">
-      <label for="rightAction">→ 右方向:</label>
+      <label for="rightAction" data-i18n="rightAction">→ 右方向:</label>
       <select id="rightAction">
         <option value="none">なし（何もしない）</option>
         <optgroup label="検索">
@@ -307,13 +309,13 @@
     </div>
 
     <div class="section-title far-drag-section">
-      大きくドラッグ（100px以上（約2.6cm））
+      <span data-i18n="farDragTitle">大きくドラッグ（100px以上（約2.6cm））</span>
       <input type="checkbox" id="farDragCheckbox" class="far-drag-checkbox">
     </div>
-    <p class="section-description far-drag-section">大きく動かした場合に別のアクションを実行できます。</p>
+    <p class="section-description far-drag-section" data-i18n="farDragDesc">大きく動かした場合に別のアクションを実行できます。</p>
 
     <div class="setting-item far-drag-section">
-      <label for="upFarAction">↑↑ 上方向（大）:</label>
+      <label for="upFarAction" data-i18n="upFarAction">↑↑ 上方向（大）:</label>
       <select id="upFarAction">
         <option value="none">なし（何もしない）</option>
         <optgroup label="検索">
@@ -340,7 +342,7 @@
     </div>
 
     <div class="setting-item far-drag-section">
-      <label for="downFarAction">↓↓ 下方向（大）:</label>
+      <label for="downFarAction" data-i18n="downFarAction">↓↓ 下方向（大）:</label>
       <select id="downFarAction">
         <option value="none">なし（何もしない）</option>
         <optgroup label="検索">
@@ -367,7 +369,7 @@
     </div>
 
     <div class="setting-item far-drag-section">
-      <label for="leftFarAction">←← 左方向（大）:</label>
+      <label for="leftFarAction" data-i18n="leftFarAction">←← 左方向（大）:</label>
       <select id="leftFarAction">
         <option value="none">なし（何もしない）</option>
         <optgroup label="検索">
@@ -394,7 +396,7 @@
     </div>
 
     <div class="setting-item far-drag-section">
-      <label for="rightFarAction">→→ 右方向（大）:</label>
+      <label for="rightFarAction" data-i18n="rightFarAction">→→ 右方向（大）:</label>
       <select id="rightFarAction">
         <option value="none">なし（何もしない）</option>
         <optgroup label="検索">
@@ -422,10 +424,10 @@
 
     <div class="button-container">
       <div class="button-group">
-        <button id="resetButton">デフォルトに戻す</button>
-        <button id="saveButton">保存</button>
+        <button id="resetButton" data-i18n="resetButton">デフォルトに戻す</button>
+        <button id="saveButton" data-i18n="saveButton">保存</button>
       </div>
-      <div id="statusMessage">保存しました</div>
+      <div id="statusMessage" data-i18n="statusSaved">保存しました</div>
     </div>
   </div>
 
