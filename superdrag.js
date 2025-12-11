@@ -1,41 +1,52 @@
 (function () {
     // デフォルト設定
     const DEFAULT_SETTINGS = {
-        // 通常のドラッグ
         up: 'google',
         down: 'twitter',
-        left: 'youtube',
+        left: 'amazon',
         right: 'copy',
-        // 大きくドラッグ
         upFar: 'none',
         downFar: 'none',
         leftFar: 'none',
-        rightFar: 'none'
+        rightFar: 'none',
+        farDragEnabled: false,
+        enableGuides: true
     };
 
-    // 現在の設定（初期値はデフォルト）
     let settings = { ...DEFAULT_SETTINGS };
-
-    // ドラッグ状態管理
     let dragStartPoint = null;
     let currentDirection = null;
     let dragStartTime = null;
     let hasTextSelection = false;
     let isFromInteractiveElement = false;
 
-    // 定数
-    const THRESHOLD = 4;           // 方向判定の最小閾値（px）
-    const FAR_THRESHOLD = 80;      // 「大きく動かす」の閾値（px）
-    const MIN_DRAG_DURATION = 150; // テキスト選択なしでリンク/ボタンからドラッグする場合の最小時間(ms)
+    const THRESHOLD = 4;
+    const FAR_THRESHOLD = 100;
+    const MIN_DRAG_DURATION = 150;
 
-    // 設定を読み込む
+    const ACTION_DISPLAY_NAMES = {
+        'none': '',
+        'google': '🔍 Google',
+        'youtube': '🎬 YouTube',
+        'twitter': '𝕏 （旧Twitter）',
+        'rakuten': '🛒 楽天',
+        'amazon': '📦 Amazon',
+        'maps': '🗺️ Maps',
+        'deepl': '🌐 DeepL',
+        'gtranslate': '🌐 Google翻訳',
+        'chatgpt': '🤖 ChatGPT',
+        'claude': '🧠 Claude',
+        'gemini': '✨ Gemini',
+        'copy': '📋 Copy'
+    };
+
+    let guideOverlayHost = null;
+    let guideOverlayRoot = null;
+    let guideManuallyHidden = false;
+
     function loadSettings() {
         try {
             chrome.storage.sync.get(DEFAULT_SETTINGS, (result) => {
-                if (chrome.runtime.lastError) {
-                    console.error('Failed to load settings:', chrome.runtime.lastError);
-                    return;
-                }
                 settings = { ...DEFAULT_SETTINGS, ...result };
             });
         } catch (e) {
@@ -43,12 +54,10 @@
         }
     }
 
-    // 設定変更を監視
     function watchSettingsChanges() {
         try {
             chrome.storage.onChanged.addListener((changes, areaName) => {
                 if (areaName !== 'sync') return;
-
                 for (const key of Object.keys(changes)) {
                     if (key in DEFAULT_SETTINGS) {
                         settings[key] = changes[key].newValue;
@@ -60,22 +69,20 @@
         }
     }
 
-    // リンクやボタンなどのインタラクティブ要素かどうかを判定
     function isInteractive(element) {
         if (!element || element.nodeType !== 1) return false;
-        // リンク（hrefを持つaタグ）
         if (element.tagName === 'A' && element.href) return true;
-        // ボタン
         if (element.tagName === 'BUTTON') return true;
-        // role="button"を持つ要素
         if (element.getAttribute && element.getAttribute('role') === 'button') return true;
-        // 親要素がインタラクティブ要素の場合もチェック
         const interactiveParent = element.closest('a[href], button, [role="button"]');
-        if (interactiveParent) return true;
-        return false;
+        return !!interactiveParent;
     }
 
-    // ドラッグ方向を判定（方向のみ）
+    function isInputElement(element) {
+        if (!element || element.nodeType !== 1) return false;
+        return element.tagName === 'INPUT' || element.tagName === 'TEXTAREA' || element.isContentEditable;
+    }
+
     function getDirection(p1, p2) {
         const dx = p2.x - p1.x;
         const dy = p2.y - p1.y;
@@ -87,14 +94,12 @@
         }
     }
 
-    // 2点間の距離を計算
     function getDistance(p1, p2) {
         const dx = p2.x - p1.x;
         const dy = p2.y - p1.y;
         return Math.sqrt(dx * dx + dy * dy);
     }
 
-    // 方向と距離から設定キーを取得
     function getSettingsKey(direction, isFar) {
         const keyMap = {
             'Up': isFar ? 'upFar' : 'up',
@@ -105,43 +110,41 @@
         return keyMap[direction] || null;
     }
 
-    // ポップアップを表示
     function showToast(x, y, text) {
         const toast = document.createElement('div');
         toast.textContent = text;
-        toast.style.position = 'fixed';
-        toast.style.left = x + 'px';
-        toast.style.top = y + 'px';
-        toast.style.background = 'rgba(0, 0, 0, 0.7)';
-        toast.style.color = 'white';
-        toast.style.padding = '4px 8px';
-        toast.style.borderRadius = '4px';
-        toast.style.zIndex = '2147483647';
-        toast.style.pointerEvents = 'none';
-        toast.style.fontSize = '12px';
-        toast.style.fontFamily = 'sans-serif';
+        toast.style.cssText = `
+            position: fixed;
+            left: ${x}px;
+            top: ${y}px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            z-index: 2147483647;
+            pointer-events: none;
+            font-size: 12px;
+            font-family: sans-serif;
+        `;
         document.body.appendChild(toast);
         setTimeout(() => {
             if (toast.parentNode) toast.parentNode.removeChild(toast);
-        }, 200);
+        }, 350);
     }
 
-    // コピー処理を実行
     async function executeCopy(text, x, y) {
         try {
             await navigator.clipboard.writeText(text);
-            showToast(x, y, 'COPY');
+            showToast(x, y, '📋Copied!');
         } catch (err) {
-            // フォールバック
             const textarea = document.createElement('textarea');
             textarea.value = text;
-            textarea.style.position = 'fixed';
-            textarea.style.opacity = '0';
+            textarea.style.cssText = 'position: fixed; opacity: 0;';
             document.body.appendChild(textarea);
             textarea.select();
             try {
                 document.execCommand('copy');
-                showToast(x, y, 'COPY');
+                showToast(x, y, '📋Copied!');
             } catch (fallbackErr) {
                 console.error('Copy failed', fallbackErr);
             }
@@ -149,29 +152,24 @@
         }
     }
 
-    // 検索処理を実行
     function executeSearch(engineId, text) {
         if (!chrome.runtime) {
             console.error('chrome.runtime is not available');
             return;
         }
-
         try {
             chrome.runtime.sendMessage({
                 type: 'search',
                 engineId: engineId,
                 text: text
-            }, (response) => {
-                if (chrome.runtime.lastError) {
-                    console.error('SendMessage error:', chrome.runtime.lastError);
-                }
+            }, () => {
+                void chrome.runtime.lastError;
             });
         } catch (err) {
             console.error('SendMessage failed:', err);
         }
     }
 
-    // 状態をリセット
     function resetState() {
         dragStartPoint = null;
         currentDirection = null;
@@ -180,57 +178,203 @@
         isFromInteractiveElement = false;
     }
 
-    // ドラッグ開始ハンドラ
+    function createGuideOverlay(x, y) {
+        if (!settings.enableGuides) return;
+        if (guideOverlayHost) return;
+
+        guideOverlayHost = document.createElement('div');
+        guideOverlayHost.id = 'superdrag-guide-overlay';
+        guideOverlayHost.style.cssText = `
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 0 !important;
+            height: 0 !important;
+            z-index: 2147483647 !important;
+            pointer-events: none !important;
+            overflow: visible !important;
+        `;
+        document.body.appendChild(guideOverlayHost);
+
+        guideOverlayRoot = guideOverlayHost.attachShadow({ mode: 'open' });
+
+        const style = document.createElement('style');
+        style.textContent = `
+            .guide-container {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+            }
+            .guide-label {
+                position: absolute;
+                background: rgba(20, 20, 23, 0.9);
+                backdrop-filter: blur(4px);
+                -webkit-backdrop-filter: blur(4px);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                color: #ffffff;
+                padding: 10px 18px;
+                border-radius: 10px;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                font-size: 15px;
+                font-weight: 500;
+                white-space: nowrap;
+                transform: translate(-50%, -50%) scale(0.9);
+                pointer-events: none;
+                opacity: 0;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+                transition: opacity 0.2s ease-out, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                z-index: 1000;
+            }
+            .guide-label.visible {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            .guide-label.far {
+                background: rgba(66, 133, 244, 0.9);
+                border-color: rgba(255, 255, 255, 0.2);
+                z-index: 900;
+            }
+            .guide-close {
+                position: absolute;
+                width: 24px;
+                height: 24px;
+                background: rgba(50, 50, 55, 0.9);
+                color: white;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                pointer-events: auto !important;
+                z-index: 2000;
+                font-family: sans-serif;
+                font-size: 16px;
+                line-height: 1;
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0;
+                transition: all 0.2s ease;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            }
+            .guide-close:hover {
+                background: rgba(80, 80, 85, 1);
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+            .guide-close.visible {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        `;
+        guideOverlayRoot.appendChild(style);
+
+        const container = document.createElement('div');
+        container.className = 'guide-container';
+        guideOverlayRoot.appendChild(container);
+
+        const closeBtn = document.createElement('div');
+        closeBtn.className = 'guide-close';
+        closeBtn.innerHTML = '&#xd7;';
+        closeBtn.title = 'Close Guide';
+        closeBtn.style.left = (x + 70) + 'px';
+        closeBtn.style.top = (y - 80) + 'px';
+
+        closeBtn.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            guideManuallyHidden = true;
+            removeGuideOverlay();
+        });
+
+        container.appendChild(closeBtn);
+
+        requestAnimationFrame(() => {
+            closeBtn.classList.add('visible');
+        });
+
+        const createLabel = (offsetX, offsetY, settingKey, isFar) => {
+            const actionId = settings[settingKey] || DEFAULT_SETTINGS[settingKey];
+            if (actionId === 'none') return;
+
+            const displayText = ACTION_DISPLAY_NAMES[actionId] || actionId;
+            const label = document.createElement('div');
+            label.className = `guide-label ${isFar ? 'far' : ''}`;
+            label.textContent = displayText;
+            label.style.left = (x + offsetX) + 'px';
+            label.style.top = (y + offsetY) + 'px';
+            container.appendChild(label);
+
+            requestAnimationFrame(() => {
+                label.classList.add('visible');
+            });
+        };
+
+        const OFFSET = 80;
+        createLabel(0, -OFFSET, 'up', false);
+        createLabel(0, OFFSET, 'down', false);
+        createLabel(-OFFSET, 0, 'left', false);
+        createLabel(OFFSET, 0, 'right', false);
+
+        if (settings.farDragEnabled) {
+            const FAR_OFFSET = 160;
+            createLabel(0, -FAR_OFFSET, 'upFar', true);
+            createLabel(0, FAR_OFFSET, 'downFar', true);
+            createLabel(-FAR_OFFSET, 0, 'leftFar', true);
+            createLabel(FAR_OFFSET, 0, 'rightFar', true);
+        }
+    }
+
+    function removeGuideOverlay() {
+        if (guideOverlayHost) {
+            if (guideOverlayHost.parentNode) {
+                guideOverlayHost.parentNode.removeChild(guideOverlayHost);
+            }
+            guideOverlayHost = null;
+            guideOverlayRoot = null;
+        }
+    }
+
     function handleDragStart(e) {
-        // INPUT, TEXTAREA, contentEditableを除外
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
+        const target = e.target;
+        if (isInputElement(target)) return;
 
         const selection = window.getSelection().toString();
         hasTextSelection = !!selection;
         let data = selection;
-        if (!data && e.target.href) {
-            data = e.target.href;
+        if (!data && target.href) {
+            data = target.href;
         }
-
         if (!data) return;
 
-        // インタラクティブ要素からのドラッグかどうかを記録
-        isFromInteractiveElement = isInteractive(e.target);
-
+        isFromInteractiveElement = isInteractive(target);
         e.dataTransfer.setData('text/plain', data);
         dragStartPoint = { x: e.clientX, y: e.clientY };
         dragStartTime = Date.now();
         currentDirection = null;
     }
 
-    // ドラッグオーバーハンドラ
     function handleDragOver(e) {
         if (!dragStartPoint) return;
         e.preventDefault();
-        e.stopPropagation();
         e.dataTransfer.dropEffect = 'move';
-
         const currentPoint = { x: e.clientX, y: e.clientY };
         currentDirection = getDirection(dragStartPoint, currentPoint);
     }
 
-    // ドラッグ終了ハンドラ
     function handleDragEnd(e) {
         resetState();
     }
 
-    // ドロップハンドラ
     async function handleDrop(e) {
         if (!dragStartPoint) return;
 
-        // ファイルドロップをチェック
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             resetState();
             return;
         }
 
-        // テキスト選択がなく、リンク/ボタンからのドラッグの場合、時間をチェック
-        // 短すぎるドラッグは誤クリックとみなして無視
         if (!hasTextSelection && isFromInteractiveElement && dragStartTime) {
             const dragDuration = Date.now() - dragStartTime;
             if (dragDuration < MIN_DRAG_DURATION) {
@@ -240,32 +384,36 @@
         }
 
         e.preventDefault();
-        e.stopPropagation();
 
         const direction = currentDirection;
         const data = e.dataTransfer.getData('text/plain');
         const dropX = e.clientX;
         const dropY = e.clientY;
 
-        // ドロップ時点での距離を計算
         const dropPoint = { x: dropX, y: dropY };
         const distance = getDistance(dragStartPoint, dropPoint);
-        const isFar = distance >= FAR_THRESHOLD;
+        let isFar = settings.farDragEnabled && distance >= FAR_THRESHOLD;
 
-        // 状態をリセット
+        if (isFar) {
+            const farSettingsKey = getSettingsKey(direction, true);
+            if (farSettingsKey) {
+                const farEngineId = settings[farSettingsKey] || DEFAULT_SETTINGS[farSettingsKey];
+                if (farEngineId === 'none') {
+                    isFar = false;
+                }
+            }
+        }
+
         resetState();
 
         if (!data || !direction) return;
 
-        // 設定から機能IDを取得（距離に基づいて通常/Far版を選択）
         const settingsKey = getSettingsKey(direction, isFar);
         if (!settingsKey) return;
 
         const engineId = settings[settingsKey] || DEFAULT_SETTINGS[settingsKey];
 
-        // 機能を実行
         if (engineId === 'none') {
-            // 何もしない
             return;
         } else if (engineId === 'copy') {
             await executeCopy(data, dropX, dropY);
@@ -274,48 +422,71 @@
         }
     }
 
-    // 要素にイベントハンドラを適用
-    function applyHandlers(node) {
-        if (node.nodeType !== 1) return; // Element node only
-        // INPUT, TEXTAREA, contentEditableを除外
-        if (node.tagName === 'INPUT' || node.tagName === 'TEXTAREA' || node.isContentEditable) return;
+    function handleMouseUp(e) {
+        if (dragStartPoint) return;
+        if (guideManuallyHidden) return;
 
-        // Using named functions prevents duplication
-        node.addEventListener('dragstart', handleDragStart);
-        node.addEventListener('dragover', handleDragOver);
-        node.addEventListener('drop', handleDrop);
-        node.addEventListener('dragend', handleDragEnd);
+        setTimeout(() => {
+            const selection = window.getSelection();
+            if (selection && selection.toString().trim().length > 0) {
+                try {
+                    const range = selection.getRangeAt(0);
+                    const rect = range.getBoundingClientRect();
+                    // ページ座標を使用（スクロール位置を加算）
+                    const centerX = rect.left + rect.width / 2 + window.scrollX;
+                    const centerY = rect.top + rect.height / 2 + window.scrollY;
+                    removeGuideOverlay();
+                    createGuideOverlay(centerX, centerY);
+                } catch (err) {
+                    removeGuideOverlay();
+                    createGuideOverlay(e.clientX + window.scrollX, e.clientY + window.scrollY);
+                }
+            }
+        }, 10);
     }
 
-    // 初期化
+    function handleMouseDown(e) {
+        if (dragStartPoint) return;
+        const selection = window.getSelection();
+        if (selection && selection.toString().length > 0) {
+            return;
+        }
+        removeGuideOverlay();
+    }
+
+    function handleSelectionChange(e) {
+        if (dragStartPoint) return;
+        const selection = window.getSelection();
+        if (!selection || selection.toString().length === 0) {
+            removeGuideOverlay();
+            guideManuallyHidden = false;
+        }
+    }
+
+    function handleKeyDown(e) {
+        if (e.key === 'Escape' && guideOverlayHost) {
+            guideManuallyHidden = true;
+            removeGuideOverlay();
+        }
+    }
+
     function init() {
         if (!document.body) {
             setTimeout(init, 100);
             return;
         }
 
-        // 設定を読み込む
         loadSettings();
-
-        // 設定変更を監視
         watchSettingsChanges();
 
-        // 全ての要素にハンドラを適用
-        document.querySelectorAll('*').forEach(applyHandlers);
-
-        // DOM変更を監視
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                mutation.addedNodes.forEach((node) => {
-                    if (node.nodeType === 1) {
-                        applyHandlers(node);
-                        node.querySelectorAll('*').forEach(applyHandlers);
-                    }
-                });
-            });
-        });
-
-        observer.observe(document.body, { childList: true, subtree: true });
+        document.addEventListener('dragstart', handleDragStart);
+        document.addEventListener('dragover', handleDragOver);
+        document.addEventListener('drop', handleDrop);
+        document.addEventListener('dragend', handleDragEnd);
+        document.addEventListener('mouseup', handleMouseUp);
+        document.addEventListener('mousedown', handleMouseDown);
+        document.addEventListener('selectionchange', handleSelectionChange);
+        document.addEventListener('keydown', handleKeyDown);
     }
 
     init();
