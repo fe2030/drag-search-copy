@@ -29,13 +29,12 @@ chrome.runtime.onInstalled.addListener((details) => {
 });
 
 // URLテンプレート定義（%s がクエリに置換される）
+// 注意: Amazon, eBay, DeepL は動的に生成するためここには定義しない、またはベースのみ定義
 const URL_TEMPLATES = {
   google: 'https://www.google.com/search?q=%s',
   youtube: 'https://www.youtube.com/results?search_query=%s',
   twitter: 'https://x.com/search?q=%s',
-  deepl: 'https://www.deepl.com/translator#en/ja/%s',
   gtranslate: 'https://translate.google.com/?sl=auto&tl=ja&text=%s',
-  amazon: 'https://www.amazon.co.jp/s?k=%s', // default to jp, logic will override
   rakuten: 'https://search.rakuten.co.jp/search/mall/%s/',
   reddit: 'https://www.reddit.com/search/?q=%s',
   maps: 'https://www.google.co.jp/maps?q=%s'
@@ -72,6 +71,51 @@ const AI_SERVICES = {
   }
 };
 
+// 動的URL生成関数
+function generateSearchUrl(engineId, text) {
+  const language = navigator.language || 'en-US';
+  const encodedText = encodeURIComponent(text);
+
+  if (engineId === 'amazon') {
+    // Amazonのロケール対応
+    // ja -> co.jp, en-GB -> co.uk, de -> de, fr -> fr, it -> it, es -> es
+    // その他 -> com
+    let tld = 'com';
+    if (language.startsWith('ja')) tld = 'co.jp';
+    else if (language === 'en-GB') tld = 'co.uk';
+    else if (language.startsWith('de')) tld = 'de';
+    else if (language.startsWith('fr')) tld = 'fr';
+    else if (language.startsWith('it')) tld = 'it';
+    else if (language.startsWith('es')) tld = 'es';
+
+    return `https://www.amazon.${tld}/s?k=${encodedText}`;
+  } else if (engineId === 'ebay') {
+    // eBayのロケール対応
+    // en-GB -> co.uk, de -> de, fr -> fr, it -> it, es -> es
+    // その他 -> com
+    let tld = 'com';
+    if (language === 'en-GB') tld = 'co.uk';
+    else if (language.startsWith('de')) tld = 'de';
+    else if (language.startsWith('fr')) tld = 'fr';
+    else if (language.startsWith('it')) tld = 'it';
+    else if (language.startsWith('es')) tld = 'es';
+
+    return `https://www.ebay.${tld}/sch/i.html?_nkw=${encodedText}`;
+  } else if (engineId === 'deepl') {
+    // DeepLのロケール対応
+    // ターゲット言語を自動設定
+    const targetLang = language.slice(0, 2);
+    // マッピングが不要な言語コードはそのままで良いことが多いが、
+    // DeepL特有の言語コードへの変換が必要な場合はここでマッピングを追加する
+    // 今回は単純に navigator.language の先頭2文字を使用
+    return `https://www.deepl.com/translator#auto/${targetLang}/${encodedText}`;
+  } else if (URL_TEMPLATES[engineId]) {
+    return URL_TEMPLATES[engineId].replace('%s', encodedText);
+  }
+
+  return null;
+}
+
 // メッセージリスナー
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   try {
@@ -100,23 +144,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       return;
     }
 
-    // 通常の検索エンジンの場合
-    let template = URL_TEMPLATES[engineId];
-    if (!template) {
+    // 検索URLの生成
+    const url = generateSearchUrl(engineId, text);
+    if (!url) {
       console.error('Unknown engineId:', engineId);
       return;
     }
 
-    // Amazonのロケール対応
-    if (engineId === 'amazon') {
-      const uiLanguage = chrome.i18n.getUILanguage();
-      if (!uiLanguage.startsWith('ja')) {
-        template = 'https://www.amazon.com/s?k=%s';
-      }
-    }
-
-    // URLを生成（%sをエンコードされたテキストで置換）
-    const url = template.replace('%s', encodeURIComponent(text));
     openNewTab(url);
 
   } catch (e) {

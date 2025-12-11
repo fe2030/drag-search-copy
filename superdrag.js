@@ -32,6 +32,7 @@
         'reddit': 'actionNameReddit',
         'rakuten': 'actionNameRakuten',
         'amazon': 'actionNameAmazon',
+        'ebay': 'actionNameEbay',
         'maps': 'actionNameMaps',
         'deepl': 'actionNameDeepL',
         'gtranslate': 'actionNameGoogleTranslate',
@@ -317,7 +318,9 @@
 
                 // アクション実行
                 if (actionId === 'copy') {
-                    executeCopy(text, x, y);
+                    // executeCopy はビューポート座標 (clientX, clientY) を期待しているため、
+                    // ページ座標 (pageX, pageY) からスクロール分を引いて渡す
+                    executeCopy(text, x - window.scrollX, y - window.scrollY);
                 } else {
                     executeSearch(actionId, text);
                 }
