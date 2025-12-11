@@ -26,18 +26,19 @@
 
     const ACTION_DISPLAY_NAMES = {
         'none': '',
-        'google': '🔍 Google',
-        'youtube': '🎬 YouTube',
-        'twitter': '𝕏 （旧Twitter）',
-        'rakuten': '🛒 楽天',
-        'amazon': '📦 Amazon',
-        'maps': '🗺️ Maps',
-        'deepl': '🌐 DeepL',
-        'gtranslate': '🌐 Google翻訳',
-        'chatgpt': '🤖 ChatGPT',
-        'claude': '🧠 Claude',
-        'gemini': '✨ Gemini',
-        'copy': '📋 Copy'
+        'google': 'actionNameGoogle',
+        'youtube': 'actionNameYoutube',
+        'twitter': 'actionNameTwitter',
+        'reddit': 'actionNameReddit',
+        'rakuten': 'actionNameRakuten',
+        'amazon': 'actionNameAmazon',
+        'maps': 'actionNameMaps',
+        'deepl': 'actionNameDeepL',
+        'gtranslate': 'actionNameGoogleTranslate',
+        'chatgpt': 'actionNameChatGPT',
+        'claude': 'actionNameClaude',
+        'gemini': 'actionNameGemini',
+        'copy': 'actionNameCopy'
     };
 
     let guideOverlayHost = null;
@@ -135,7 +136,7 @@
     async function executeCopy(text, x, y) {
         try {
             await navigator.clipboard.writeText(text);
-            showToast(x, y, '📋Copied!');
+            showToast(x, y, chrome.i18n.getMessage('toastCopied'));
         } catch (err) {
             const textarea = document.createElement('textarea');
             textarea.value = text;
@@ -144,7 +145,7 @@
             textarea.select();
             try {
                 document.execCommand('copy');
-                showToast(x, y, '📋Copied!');
+                showToast(x, y, chrome.i18n.getMessage('toastCopied'));
             } catch (fallbackErr) {
                 console.error('Copy failed', fallbackErr);
             }
@@ -178,7 +179,8 @@
         isFromInteractiveElement = false;
     }
 
-    function createGuideOverlay(x, y) {
+    function createGuideOverlay(x, y, text) {
+
         if (!settings.enableGuides) return;
         if (guideOverlayHost) return;
 
@@ -222,11 +224,13 @@
                 font-weight: 500;
                 white-space: nowrap;
                 transform: translate(-50%, -50%) scale(0.9);
-                pointer-events: none;
+                pointer-events: auto;
+                cursor: pointer;
                 opacity: 0;
                 box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
                 transition: opacity 0.2s ease-out, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
                 z-index: 1000;
+                user-select: none;
             }
             .guide-label.visible {
                 opacity: 1;
@@ -277,7 +281,7 @@
         const closeBtn = document.createElement('div');
         closeBtn.className = 'guide-close';
         closeBtn.innerHTML = '&#xd7;';
-        closeBtn.title = 'Close Guide';
+        closeBtn.title = chrome.i18n.getMessage('guideCloseTitle');
         closeBtn.style.left = (x + 70) + 'px';
         closeBtn.style.top = (y - 80) + 'px';
 
@@ -298,12 +302,31 @@
             const actionId = settings[settingKey] || DEFAULT_SETTINGS[settingKey];
             if (actionId === 'none') return;
 
-            const displayText = ACTION_DISPLAY_NAMES[actionId] || actionId;
+            const i18nKey = ACTION_DISPLAY_NAMES[actionId];
+            const displayText = i18nKey ? chrome.i18n.getMessage(i18nKey) : actionId;
             const label = document.createElement('div');
             label.className = `guide-label ${isFar ? 'far' : ''}`;
             label.textContent = displayText;
             label.style.left = (x + offsetX) + 'px';
             label.style.top = (y + offsetY) + 'px';
+
+            // アイコンクリックでアクション実行
+            label.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+
+                // アクション実行
+                if (actionId === 'copy') {
+                    executeCopy(text, x, y);
+                } else {
+                    executeSearch(actionId, text);
+                }
+
+                // ガイドを閉じる
+                guideManuallyHidden = true;
+                removeGuideOverlay();
+            });
+
             container.appendChild(label);
 
             requestAnimationFrame(() => {
@@ -428,7 +451,8 @@
 
         setTimeout(() => {
             const selection = window.getSelection();
-            if (selection && selection.toString().trim().length > 0) {
+            const text = selection ? selection.toString() : '';
+            if (text.trim().length > 0) {
                 try {
                     const range = selection.getRangeAt(0);
                     const rect = range.getBoundingClientRect();
@@ -436,10 +460,10 @@
                     const centerX = rect.left + rect.width / 2 + window.scrollX;
                     const centerY = rect.top + rect.height / 2 + window.scrollY;
                     removeGuideOverlay();
-                    createGuideOverlay(centerX, centerY);
+                    createGuideOverlay(centerX, centerY, text);
                 } catch (err) {
                     removeGuideOverlay();
-                    createGuideOverlay(e.clientX + window.scrollX, e.clientY + window.scrollY);
+                    createGuideOverlay(e.clientX + window.scrollX, e.clientY + window.scrollY, text);
                 }
             }
         }, 10);

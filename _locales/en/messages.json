@@ -1,0 +1,173 @@
+{
+    "appName": {
+        "message": "Drag search&copy"
+    },
+    "appDesc": {
+        "message": "Drag and drop to search or copy text."
+    },
+    "settingsTitle": {
+        "message": "Drag search&copy Settings"
+    },
+    "settingsTitleSuffix": {
+        "message": " search&copy Settings"
+    },
+    "settingsDesc": {
+        "message": "Select action for each drag direction."
+    },
+    "enableGuidesLabel": {
+        "message": "Show Visual Guides:"
+    },
+    "normalDragTitle": {
+        "message": "Normal Drag"
+    },
+    "upAction": {
+        "message": "↑ Up:"
+    },
+    "downAction": {
+        "message": "↓ Down:"
+    },
+    "leftAction": {
+        "message": "← Left:"
+    },
+    "rightAction": {
+        "message": "→ Right:"
+    },
+    "actionNone": {
+        "message": "None"
+    },
+    "groupSearch": {
+        "message": "Search"
+    },
+    "searchGoogle": {
+        "message": "Google Search"
+    },
+    "searchYoutube": {
+        "message": "YouTube Search"
+    },
+    "searchTwitter": {
+        "message": "X (Twitter) Search"
+    },
+    "searchRakuten": {
+        "message": "Rakuten Search"
+    },
+    "searchAmazon": {
+        "message": "Amazon Search"
+    },
+    "searchMaps": {
+        "message": "Google Maps"
+    },
+    "groupTranslation": {
+        "message": "Translation"
+    },
+    "translateDeepL": {
+        "message": "DeepL Translate"
+    },
+    "translateGoogle": {
+        "message": "Google Translate"
+    },
+    "groupAI": {
+        "message": "AI (Autofill)"
+    },
+    "groupOther": {
+        "message": "Other"
+    },
+    "actionCopy": {
+        "message": "Copy to Clipboard"
+    },
+    "farDragTitle": {
+        "message": "Far Drag (100px+)"
+    },
+    "farDragDesc": {
+        "message": "Far drag executes a different action."
+    },
+    "upFarAction": {
+        "message": "↑↑ Up (Far):"
+    },
+    "downFarAction": {
+        "message": "↓↓ Down (Far):"
+    },
+    "leftFarAction": {
+        "message": "←← Left (Far):"
+    },
+    "rightFarAction": {
+        "message": "→→ Right (Far):"
+    },
+    "farDragCheckbox": {
+        "message": "Enable"
+    },
+    "resetButton": {
+        "message": "Reset to Default"
+    },
+    "saveButton": {
+        "message": "Save"
+    },
+    "statusSaved": {
+        "message": "Saved successfully"
+    },
+    "statusSaveFailed": {
+        "message": "Failed to save"
+    },
+    "statusResetSuccess": {
+        "message": "Reset to default"
+    },
+    "statusResetFailed": {
+        "message": "Failed to reset"
+    },
+    "actionNameGoogle": {
+        "message": "🔍 Google"
+    },
+    "actionNameYoutube": {
+        "message": "🎬 YouTube"
+    },
+    "actionNameTwitter": {
+        "message": "𝕏 (Twitter)"
+    },
+    "actionNameRakuten": {
+        "message": "🛒 Rakuten"
+    },
+    "actionNameAmazon": {
+        "message": "📦 Amazon"
+    },
+    "actionNameReddit": {
+        "message": "👽 Reddit"
+    },
+    "actionNameMaps": {
+        "message": "🗺️ Maps"
+    },
+    "actionNameDeepL": {
+        "message": "🌐 DeepL"
+    },
+    "actionNameGoogleTranslate": {
+        "message": "🌐 Google"
+    },
+    "actionNameChatGPT": {
+        "message": "🤖 ChatGPT"
+    },
+    "actionNameClaude": {
+        "message": "🧠 Claude"
+    },
+    "actionNameGemini": {
+        "message": "✨ Gemini"
+    },
+    "nameReddit": {
+        "message": "Reddit Search"
+    },
+    "nameChatGPT": {
+        "message": "ChatGPT"
+    },
+    "nameClaude": {
+        "message": "Claude"
+    },
+    "nameGemini": {
+        "message": "Gemini"
+    },
+    "actionNameCopy": {
+        "message": "📋 Copy"
+    },
+    "toastCopied": {
+        "message": "📋Copied!"
+    },
+    "guideCloseTitle": {
+        "message": "Close Guide"
+    }
+}

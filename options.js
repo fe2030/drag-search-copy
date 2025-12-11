@@ -34,8 +34,68 @@ const statusMessage = document.getElementById('statusMessage');
 const dragToggle = document.getElementById('dragToggle');
 const farDragCheckbox = document.getElementById('farDragCheckbox');
 const enableGuidesCheckbox = document.getElementById('enableGuidesCheckbox');
+const resetButton = document.getElementById('resetButton');
+
 let farDragSections = null;
 let tripleClickUsed = false; // 3回クリックが既に使用されたかどうか
+
+// i18n マッピング
+const OPTION_I18N_MAP = {
+  'none': 'actionNone',
+  'google': 'searchGoogle',
+  'youtube': 'searchYoutube',
+  'twitter': 'searchTwitter',
+  'reddit': 'nameReddit',
+  'rakuten': 'searchRakuten',
+  'amazon': 'searchAmazon',
+  'maps': 'searchMaps',
+  'deepl': 'translateDeepL',
+  'gtranslate': 'translateGoogle',
+  'chatgpt': 'nameChatGPT',
+  'claude': 'nameClaude',
+  'gemini': 'nameGemini',
+  'copy': 'actionCopy'
+};
+
+const OPTGROUP_LABEL_MAP = {
+  '検索': 'groupSearch',
+  '翻訳': 'groupTranslation',
+  'AI（入力欄に自動入力）': 'groupAI',
+  'その他': 'groupOther'
+};
+
+// ページ要素のローカライズ
+function localizeHtmlPage() {
+  // data-i18n 属性を持つ要素を翻訳
+  const elements = document.querySelectorAll('[data-i18n]');
+  elements.forEach(element => {
+    const key = element.getAttribute('data-i18n');
+    const message = chrome.i18n.getMessage(key);
+    if (message) {
+      element.textContent = message;
+    }
+  });
+
+  // ドロップダウンのオプションを翻訳
+  document.querySelectorAll('option').forEach(opt => {
+    const key = OPTION_I18N_MAP[opt.value];
+    if (key) {
+      opt.textContent = chrome.i18n.getMessage(key);
+    }
+  });
+
+  // optgroupのラベルを翻訳
+  document.querySelectorAll('optgroup').forEach(group => {
+    // 現在のラベルに基づいて翻訳（HTMLが日本語のため）
+    const key = OPTGROUP_LABEL_MAP[group.label];
+    if (key) {
+      group.label = chrome.i18n.getMessage(key);
+    }
+  });
+
+  // タイトルタグの翻訳
+  document.title = chrome.i18n.getMessage('settingsTitle');
+}
 
 // 設定を読み込んでUIに反映
 function loadSettings() {
@@ -120,10 +180,10 @@ function saveSettings() {
     chrome.storage.sync.set(settings, () => {
       if (chrome.runtime.lastError) {
         console.error('設定の保存に失敗:', chrome.runtime.lastError);
-        showStatus('保存に失敗しました', true);
+        showStatus(chrome.i18n.getMessage('statusSaveFailed'), true);
         return;
       }
-      showStatus('保存しました', false);
+      showStatus(chrome.i18n.getMessage('statusSaved'), false);
     });
   } catch (e) {
     console.error('設定の保存中にエラー:', e);
@@ -258,6 +318,22 @@ if (dragToggle) {
 
 // イベントリスナー
 document.addEventListener('DOMContentLoaded', () => {
+  // ローカライズ
+  localizeHtmlPage();
+
+  // 非日本語環境で楽天を非表示にする
+  const uiLanguage = chrome.i18n.getUILanguage();
+  if (!uiLanguage.startsWith('ja')) {
+    const rakutenOptions = document.querySelectorAll('option[value="rakuten"]');
+    rakutenOptions.forEach(option => {
+      option.style.display = 'none'; // または option.remove()
+      // 既に選択されている場合はデフォルト(google)などに変更するロジックが必要だが、
+      // 既存ユーザーの設定を勝手に変えるのはリスクがあるため、今回は非表示のみとする
+      // 新規インストールなどの場合はリストに出ないため選択されない
+      option.remove();
+    });
+  }
+
   // 初期状態で大きくドラッグセクションを非表示にする
   if (!farDragSections) {
     farDragSections = document.querySelectorAll('.far-drag-section');
@@ -314,7 +390,7 @@ if (saveButton) {
 }
 
 // リセットボタンの要素
-const resetButton = document.getElementById('resetButton');
+// const resetButton = document.getElementById('resetButton'); // Removed duplicate
 
 // デフォルト設定にリセット
 function resetToDefault() {
@@ -322,7 +398,7 @@ function resetToDefault() {
     chrome.storage.sync.set(DEFAULT_SETTINGS, () => {
       if (chrome.runtime.lastError) {
         console.error('設定のリセットに失敗:', chrome.runtime.lastError);
-        showStatus('リセットに失敗しました', true);
+        showStatus(chrome.i18n.getMessage('statusResetFailed'), true);
         return;
       }
       // UI にデフォルト設定を適用
@@ -332,11 +408,11 @@ function resetToDefault() {
       if (dragToggle) {
         dragToggle.style.cursor = 'pointer';
       }
-      showStatus('デフォルトに戻しました', false);
+      showStatus(chrome.i18n.getMessage('statusResetSuccess'), false);
     });
   } catch (e) {
     console.error('設定のリセット中にエラー:', e);
-    showStatus('リセットに失敗しました', true);
+    showStatus(chrome.i18n.getMessage('statusResetFailed'), true);
   }
 }
 

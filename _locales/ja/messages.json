@@ -1,0 +1,173 @@
+{
+    "appName": {
+        "message": "Drag search&copy"
+    },
+    "appDesc": {
+        "message": "ドラッグアンドドロップで検索やコピーを実行します。"
+    },
+    "settingsTitle": {
+        "message": "Drag search&copy 設定"
+    },
+    "settingsTitleSuffix": {
+        "message": " search&copy 設定"
+    },
+    "settingsDesc": {
+        "message": "ドラッグ方向ごとに実行するアクションを選択してください。"
+    },
+    "enableGuidesLabel": {
+        "message": "視覚ガイドを表示する:"
+    },
+    "normalDragTitle": {
+        "message": "通常のドラッグ"
+    },
+    "upAction": {
+        "message": "↑ 上方向:"
+    },
+    "downAction": {
+        "message": "↓ 下方向:"
+    },
+    "leftAction": {
+        "message": "← 左方向:"
+    },
+    "rightAction": {
+        "message": "→ 右方向:"
+    },
+    "actionNone": {
+        "message": "なし（何もしない）"
+    },
+    "groupSearch": {
+        "message": "検索"
+    },
+    "searchGoogle": {
+        "message": "Google 検索"
+    },
+    "searchYoutube": {
+        "message": "YouTube 検索"
+    },
+    "searchTwitter": {
+        "message": "X (Twitter) 検索"
+    },
+    "searchRakuten": {
+        "message": "楽天検索"
+    },
+    "searchAmazon": {
+        "message": "Amazon 検索"
+    },
+    "searchMaps": {
+        "message": "Google マップ"
+    },
+    "groupTranslation": {
+        "message": "翻訳"
+    },
+    "translateDeepL": {
+        "message": "DeepL 翻訳"
+    },
+    "translateGoogle": {
+        "message": "Google 翻訳"
+    },
+    "groupAI": {
+        "message": "AI（入力欄に自動入力）"
+    },
+    "groupOther": {
+        "message": "その他"
+    },
+    "actionCopy": {
+        "message": "クリップボードにコピー"
+    },
+    "farDragTitle": {
+        "message": "大きくドラッグ（100px以上（約2.6cm））"
+    },
+    "farDragDesc": {
+        "message": "大きく動かした場合に別のアクションを実行できます。"
+    },
+    "upFarAction": {
+        "message": "↑↑ 上方向（大）:"
+    },
+    "downFarAction": {
+        "message": "↓↓ 下方向（大）:"
+    },
+    "leftFarAction": {
+        "message": "←← 左方向（大）:"
+    },
+    "rightFarAction": {
+        "message": "→→ 右方向（大）:"
+    },
+    "farDragCheckbox": {
+        "message": "有効にする"
+    },
+    "resetButton": {
+        "message": "デフォルトに戻す"
+    },
+    "saveButton": {
+        "message": "保存"
+    },
+    "statusSaved": {
+        "message": "保存しました"
+    },
+    "statusSaveFailed": {
+        "message": "保存に失敗しました"
+    },
+    "statusResetSuccess": {
+        "message": "デフォルトに戻しました"
+    },
+    "statusResetFailed": {
+        "message": "リセットに失敗しました"
+    },
+    "actionNameGoogle": {
+        "message": "🔍 Google"
+    },
+    "actionNameYoutube": {
+        "message": "🎬 YouTube"
+    },
+    "actionNameTwitter": {
+        "message": "𝕏 （旧Twitter）"
+    },
+    "actionNameRakuten": {
+        "message": "🛒 楽天"
+    },
+    "actionNameAmazon": {
+        "message": "📦 Amazon"
+    },
+    "actionNameReddit": {
+        "message": "👽 Reddit"
+    },
+    "actionNameMaps": {
+        "message": "🗺️ Maps"
+    },
+    "actionNameDeepL": {
+        "message": "🌐 DeepL"
+    },
+    "actionNameGoogleTranslate": {
+        "message": "🌐 Google翻訳"
+    },
+    "actionNameChatGPT": {
+        "message": "🤖 ChatGPT"
+    },
+    "actionNameClaude": {
+        "message": "🧠 Claude"
+    },
+    "actionNameGemini": {
+        "message": "✨ Gemini"
+    },
+    "nameReddit": {
+        "message": "Reddit 検索"
+    },
+    "nameChatGPT": {
+        "message": "ChatGPT"
+    },
+    "nameClaude": {
+        "message": "Claude"
+    },
+    "nameGemini": {
+        "message": "Gemini"
+    },
+    "actionNameCopy": {
+        "message": "📋 Copy"
+    },
+    "toastCopied": {
+        "message": "📋Copied!"
+    },
+    "guideCloseTitle": {
+        "message": "ガイドを閉じる"
+    }
+}
