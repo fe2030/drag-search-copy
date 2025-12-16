@@ -1,0 +1,176 @@
+{
+    "appName": {
+        "message": "Drag search&copy"
+    },
+    "appDesc": {
+        "message": "Ziehen und ablegen zum Suchen oder Kopieren von Text."
+    },
+    "settingsTitle": {
+        "message": "Drag search&copy Einstellungen"
+    },
+    "settingsTitleSuffix": {
+        "message": " search&copy Einstellungen"
+    },
+    "settingsDesc": {
+        "message": "Wählen Sie eine Aktion für jede Ziehrichtung."
+    },
+    "enableGuidesLabel": {
+        "message": "Visuelle Hilfslinien anzeigen:"
+    },
+    "normalDragTitle": {
+        "message": "Normales Ziehen"
+    },
+    "upAction": {
+        "message": "↑ Oben:"
+    },
+    "downAction": {
+        "message": "↓ Unten:"
+    },
+    "leftAction": {
+        "message": "← Links:"
+    },
+    "rightAction": {
+        "message": "→ Rechts:"
+    },
+    "actionNone": {
+        "message": "Keine"
+    },
+    "groupSearch": {
+        "message": "Suche"
+    },
+    "searchGoogle": {
+        "message": "Google Suche"
+    },
+    "searchYoutube": {
+        "message": "YouTube Suche"
+    },
+    "searchTwitter": {
+        "message": "X (Twitter) Suche"
+    },
+    "searchRakuten": {
+        "message": "Rakuten Suche"
+    },
+    "searchAmazon": {
+        "message": "Amazon Suche"
+    },
+    "searchMaps": {
+        "message": "Google Maps"
+    },
+    "groupTranslation": {
+        "message": "Übersetzung"
+    },
+    "translateDeepL": {
+        "message": "DeepL Übersetzung"
+    },
+    "translateGoogle": {
+        "message": "Google Übersetzung"
+    },
+    "groupAI": {
+        "message": "AI (Autofill)"
+    },
+    "groupOther": {
+        "message": "Sonstige"
+    },
+    "actionCopy": {
+        "message": "In die Zwischenablage kopieren"
+    },
+    "farDragTitle": {
+        "message": "Weites Ziehen (100px+)"
+    },
+    "farDragDesc": {
+        "message": "Weites Ziehen führt eine andere Aktion aus."
+    },
+    "upFarAction": {
+        "message": "↑↑ Oben (Weit):"
+    },
+    "downFarAction": {
+        "message": "↓↓ Unten (Weit):"
+    },
+    "leftFarAction": {
+        "message": "←← Links (Weit):"
+    },
+    "rightFarAction": {
+        "message": "→→ Rechts (Weit):"
+    },
+    "farDragCheckbox": {
+        "message": "Aktivieren"
+    },
+    "resetButton": {
+        "message": "Auf Standard zurücksetzen"
+    },
+    "saveButton": {
+        "message": "Speichern"
+    },
+    "statusSaved": {
+        "message": "Erfolgreich gespeichert"
+    },
+    "statusSaveFailed": {
+        "message": "Speichern fehlgeschlagen"
+    },
+    "statusResetSuccess": {
+        "message": "Auf Standard zurückgesetzt"
+    },
+    "statusResetFailed": {
+        "message": "Zurücksetzen fehlgeschlagen"
+    },
+    "actionNameGoogle": {
+        "message": "🔍 Google"
+    },
+    "actionNameYoutube": {
+        "message": "🎬 YouTube"
+    },
+    "actionNameTwitter": {
+        "message": "𝕏 (Twitter)"
+    },
+    "actionNameRakuten": {
+        "message": "🛒 Rakuten"
+    },
+    "actionNameAmazon": {
+        "message": "📦 Amazon"
+    },
+    "actionNameEbay": {
+        "message": "🛍️ eBay"
+    },
+    "actionNameReddit": {
+        "message": "👽 Reddit"
+    },
+    "actionNameMaps": {
+        "message": "🗺️ Maps"
+    },
+    "actionNameDeepL": {
+        "message": "🌐 DeepL"
+    },
+    "actionNameGoogleTranslate": {
+        "message": "🌐 Google"
+    },
+    "actionNameChatGPT": {
+        "message": "🤖 ChatGPT"
+    },
+    "actionNameClaude": {
+        "message": "🧠 Claude"
+    },
+    "actionNameGemini": {
+        "message": "✨ Gemini"
+    },
+    "nameReddit": {
+        "message": "Reddit Suche"
+    },
+    "nameChatGPT": {
+        "message": "ChatGPT"
+    },
+    "nameClaude": {
+        "message": "Claude"
+    },
+    "nameGemini": {
+        "message": "Gemini"
+    },
+    "actionNameCopy": {
+        "message": "📋 Kopieren"
+    },
+    "toastCopied": {
+        "message": "📋 Kopiert!"
+    },
+    "guideCloseTitle": {
+        "message": "Anleitung schließen"
+    }
+}

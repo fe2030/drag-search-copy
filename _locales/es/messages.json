@@ -1,0 +1,176 @@
+{
+    "appName": {
+        "message": "Drag search&copy"
+    },
+    "appDesc": {
+        "message": "Arrastrar y soltar para buscar o copiar texto."
+    },
+    "settingsTitle": {
+        "message": "Configuración de Drag search&copy"
+    },
+    "settingsTitleSuffix": {
+        "message": " Configuración de search&copy"
+    },
+    "settingsDesc": {
+        "message": "Selecciona una acción para cada dirección de arrastre."
+    },
+    "enableGuidesLabel": {
+        "message": "Mostrar guías visuales:"
+    },
+    "normalDragTitle": {
+        "message": "Arrastre normal"
+    },
+    "upAction": {
+        "message": "↑ Arriba:"
+    },
+    "downAction": {
+        "message": "↓ Abajo:"
+    },
+    "leftAction": {
+        "message": "← Izquierda:"
+    },
+    "rightAction": {
+        "message": "→ Derecha:"
+    },
+    "actionNone": {
+        "message": "Ninguna"
+    },
+    "groupSearch": {
+        "message": "Búsqueda"
+    },
+    "searchGoogle": {
+        "message": "Búsqueda en Google"
+    },
+    "searchYoutube": {
+        "message": "Búsqueda en YouTube"
+    },
+    "searchTwitter": {
+        "message": "Búsqueda en X (Twitter)"
+    },
+    "searchRakuten": {
+        "message": "Búsqueda en Rakuten"
+    },
+    "searchAmazon": {
+        "message": "Búsqueda en Amazon"
+    },
+    "searchMaps": {
+        "message": "Google Maps"
+    },
+    "groupTranslation": {
+        "message": "Traducción"
+    },
+    "translateDeepL": {
+        "message": "Traducción DeepL"
+    },
+    "translateGoogle": {
+        "message": "Traducción Google"
+    },
+    "groupAI": {
+        "message": "IA (Autocompletar)"
+    },
+    "groupOther": {
+        "message": "Otros"
+    },
+    "actionCopy": {
+        "message": "Copiar al portapapeles"
+    },
+    "farDragTitle": {
+        "message": "Arrastre largo (100px+)"
+    },
+    "farDragDesc": {
+        "message": "El arrastre largo ejecuta una acción diferente."
+    },
+    "upFarAction": {
+        "message": "↑↑ Arriba (Largo):"
+    },
+    "downFarAction": {
+        "message": "↓↓ Abajo (Largo):"
+    },
+    "leftFarAction": {
+        "message": "←← Izquierda (Largo):"
+    },
+    "rightFarAction": {
+        "message": "→→ Derecha (Largo):"
+    },
+    "farDragCheckbox": {
+        "message": "Habilitar"
+    },
+    "resetButton": {
+        "message": "Restaurar valores predeterminados"
+    },
+    "saveButton": {
+        "message": "Guardar"
+    },
+    "statusSaved": {
+        "message": "Guardado correctamente"
+    },
+    "statusSaveFailed": {
+        "message": "Error al guardar"
+    },
+    "statusResetSuccess": {
+        "message": "Restaurado a valores predeterminados"
+    },
+    "statusResetFailed": {
+        "message": "Error al restaurar"
+    },
+    "actionNameGoogle": {
+        "message": "🔍 Google"
+    },
+    "actionNameYoutube": {
+        "message": "🎬 YouTube"
+    },
+    "actionNameTwitter": {
+        "message": "𝕏 (Twitter)"
+    },
+    "actionNameRakuten": {
+        "message": "🛒 Rakuten"
+    },
+    "actionNameAmazon": {
+        "message": "📦 Amazon"
+    },
+    "actionNameEbay": {
+        "message": "🛍️ eBay"
+    },
+    "actionNameReddit": {
+        "message": "👽 Reddit"
+    },
+    "actionNameMaps": {
+        "message": "🗺️ Maps"
+    },
+    "actionNameDeepL": {
+        "message": "🌐 DeepL"
+    },
+    "actionNameGoogleTranslate": {
+        "message": "🌐 Google"
+    },
+    "actionNameChatGPT": {
+        "message": "🤖 ChatGPT"
+    },
+    "actionNameClaude": {
+        "message": "🧠 Claude"
+    },
+    "actionNameGemini": {
+        "message": "✨ Gemini"
+    },
+    "nameReddit": {
+        "message": "Búsqueda en Reddit"
+    },
+    "nameChatGPT": {
+        "message": "ChatGPT"
+    },
+    "nameClaude": {
+        "message": "Claude"
+    },
+    "nameGemini": {
+        "message": "Gemini"
+    },
+    "actionNameCopy": {
+        "message": "📋 Copiar"
+    },
+    "toastCopied": {
+        "message": "📋 ¡Copiado!"
+    },
+    "guideCloseTitle": {
+        "message": "Cerrar guía"
+    }
+}

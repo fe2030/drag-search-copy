@@ -1,0 +1,176 @@
+{
+    "appName": {
+        "message": "Drag search&copy"
+    },
+    "appDesc": {
+        "message": "Trascina e rilascia per cercare o copiare il testo."
+    },
+    "settingsTitle": {
+        "message": "Impostazioni Drag search&copy"
+    },
+    "settingsTitleSuffix": {
+        "message": " Impostazioni search&copy"
+    },
+    "settingsDesc": {
+        "message": "Seleziona l'azione per ogni direzione di trascinamento."
+    },
+    "enableGuidesLabel": {
+        "message": "Mostra guide visive:"
+    },
+    "normalDragTitle": {
+        "message": "Trascinamento normale"
+    },
+    "upAction": {
+        "message": "↑ Su:"
+    },
+    "downAction": {
+        "message": "↓ Giù:"
+    },
+    "leftAction": {
+        "message": "← Sinistra:"
+    },
+    "rightAction": {
+        "message": "→ Destra:"
+    },
+    "actionNone": {
+        "message": "Nessuna"
+    },
+    "groupSearch": {
+        "message": "Ricerca"
+    },
+    "searchGoogle": {
+        "message": "Ricerca Google"
+    },
+    "searchYoutube": {
+        "message": "Ricerca YouTube"
+    },
+    "searchTwitter": {
+        "message": "Ricerca X (Twitter)"
+    },
+    "searchRakuten": {
+        "message": "Ricerca Rakuten"
+    },
+    "searchAmazon": {
+        "message": "Ricerca Amazon"
+    },
+    "searchMaps": {
+        "message": "Google Maps"
+    },
+    "groupTranslation": {
+        "message": "Traduzione"
+    },
+    "translateDeepL": {
+        "message": "Traduzione DeepL"
+    },
+    "translateGoogle": {
+        "message": "Traduzione Google"
+    },
+    "groupAI": {
+        "message": "AI (Compilazione auto)"
+    },
+    "groupOther": {
+        "message": "Altro"
+    },
+    "actionCopy": {
+        "message": "Copia negli appunti"
+    },
+    "farDragTitle": {
+        "message": "Trascinamento esteso (100px+)"
+    },
+    "farDragDesc": {
+        "message": "Il trascinamento esteso esegue un'azione diversa."
+    },
+    "upFarAction": {
+        "message": "↑↑ Su (Lontano):"
+    },
+    "downFarAction": {
+        "message": "↓↓ Giù (Lontano):"
+    },
+    "leftFarAction": {
+        "message": "←← Sinistra (Lontano):"
+    },
+    "rightFarAction": {
+        "message": "→→ Destra (Lontano):"
+    },
+    "farDragCheckbox": {
+        "message": "Abilita"
+    },
+    "resetButton": {
+        "message": "Ripristina predefiniti"
+    },
+    "saveButton": {
+        "message": "Salva"
+    },
+    "statusSaved": {
+        "message": "Salvato con successo"
+    },
+    "statusSaveFailed": {
+        "message": "Salvataggio fallito"
+    },
+    "statusResetSuccess": {
+        "message": "Ripristinato ai predefiniti"
+    },
+    "statusResetFailed": {
+        "message": "Ripristino fallito"
+    },
+    "actionNameGoogle": {
+        "message": "🔍 Google"
+    },
+    "actionNameYoutube": {
+        "message": "🎬 YouTube"
+    },
+    "actionNameTwitter": {
+        "message": "𝕏 (Twitter)"
+    },
+    "actionNameRakuten": {
+        "message": "🛒 Rakuten"
+    },
+    "actionNameAmazon": {
+        "message": "📦 Amazon"
+    },
+    "actionNameEbay": {
+        "message": "🛍️ eBay"
+    },
+    "actionNameReddit": {
+        "message": "👽 Reddit"
+    },
+    "actionNameMaps": {
+        "message": "🗺️ Maps"
+    },
+    "actionNameDeepL": {
+        "message": "🌐 DeepL"
+    },
+    "actionNameGoogleTranslate": {
+        "message": "🌐 Google"
+    },
+    "actionNameChatGPT": {
+        "message": "🤖 ChatGPT"
+    },
+    "actionNameClaude": {
+        "message": "🧠 Claude"
+    },
+    "actionNameGemini": {
+        "message": "✨ Gemini"
+    },
+    "nameReddit": {
+        "message": "Ricerca Reddit"
+    },
+    "nameChatGPT": {
+        "message": "ChatGPT"
+    },
+    "nameClaude": {
+        "message": "Claude"
+    },
+    "nameGemini": {
+        "message": "Gemini"
+    },
+    "actionNameCopy": {
+        "message": "📋 Copia"
+    },
+    "toastCopied": {
+        "message": "📋 Copiato!"
+    },
+    "guideCloseTitle": {
+        "message": "Chiudi guida"
+    }
+}

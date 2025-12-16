@@ -1,0 +1,176 @@
+{
+    "appName": {
+        "message": "Drag search&copy"
+    },
+    "appDesc": {
+        "message": "Glisser-déposer pour rechercher ou copier du texte."
+    },
+    "settingsTitle": {
+        "message": "Paramètres Drag search&copy"
+    },
+    "settingsTitleSuffix": {
+        "message": " Paramètres search&copy"
+    },
+    "settingsDesc": {
+        "message": "Sélectionnez l'action pour chaque direction de glissement."
+    },
+    "enableGuidesLabel": {
+        "message": "Afficher les guides visuels :"
+    },
+    "normalDragTitle": {
+        "message": "Glissement normal"
+    },
+    "upAction": {
+        "message": "↑ Haut :"
+    },
+    "downAction": {
+        "message": "↓ Bas :"
+    },
+    "leftAction": {
+        "message": "← Gauche :"
+    },
+    "rightAction": {
+        "message": "→ Droite :"
+    },
+    "actionNone": {
+        "message": "Aucun"
+    },
+    "groupSearch": {
+        "message": "Recherche"
+    },
+    "searchGoogle": {
+        "message": "Recherche Google"
+    },
+    "searchYoutube": {
+        "message": "Recherche YouTube"
+    },
+    "searchTwitter": {
+        "message": "Recherche X (Twitter)"
+    },
+    "searchRakuten": {
+        "message": "Recherche Rakuten"
+    },
+    "searchAmazon": {
+        "message": "Recherche Amazon"
+    },
+    "searchMaps": {
+        "message": "Google Maps"
+    },
+    "groupTranslation": {
+        "message": "Traduction"
+    },
+    "translateDeepL": {
+        "message": "Traduction DeepL"
+    },
+    "translateGoogle": {
+        "message": "Traduction Google"
+    },
+    "groupAI": {
+        "message": "IA (Remplissage auto)"
+    },
+    "groupOther": {
+        "message": "Autre"
+    },
+    "actionCopy": {
+        "message": "Copier dans le presse-papiers"
+    },
+    "farDragTitle": {
+        "message": "Glissement étendu (100px+)"
+    },
+    "farDragDesc": {
+        "message": "Un glissement étendu exécute une action différente."
+    },
+    "upFarAction": {
+        "message": "↑↑ Haut (Loin) :"
+    },
+    "downFarAction": {
+        "message": "↓↓ Bas (Loin) :"
+    },
+    "leftFarAction": {
+        "message": "←← Gauche (Loin) :"
+    },
+    "rightFarAction": {
+        "message": "→→ Droite (Loin) :"
+    },
+    "farDragCheckbox": {
+        "message": "Activer"
+    },
+    "resetButton": {
+        "message": "Rétablir les paramètres par défaut"
+    },
+    "saveButton": {
+        "message": "Enregistrer"
+    },
+    "statusSaved": {
+        "message": "Enregistré avec succès"
+    },
+    "statusSaveFailed": {
+        "message": "Échec de l'enregistrement"
+    },
+    "statusResetSuccess": {
+        "message": "Rétabli aux paramètres par défaut"
+    },
+    "statusResetFailed": {
+        "message": "Échec de la réinitialisation"
+    },
+    "actionNameGoogle": {
+        "message": "🔍 Google"
+    },
+    "actionNameYoutube": {
+        "message": "🎬 YouTube"
+    },
+    "actionNameTwitter": {
+        "message": "𝕏 (Twitter)"
+    },
+    "actionNameRakuten": {
+        "message": "🛒 Rakuten"
+    },
+    "actionNameAmazon": {
+        "message": "📦 Amazon"
+    },
+    "actionNameEbay": {
+        "message": "🛍️ eBay"
+    },
+    "actionNameReddit": {
+        "message": "👽 Reddit"
+    },
+    "actionNameMaps": {
+        "message": "🗺️ Maps"
+    },
+    "actionNameDeepL": {
+        "message": "🌐 DeepL"
+    },
+    "actionNameGoogleTranslate": {
+        "message": "🌐 Google"
+    },
+    "actionNameChatGPT": {
+        "message": "🤖 ChatGPT"
+    },
+    "actionNameClaude": {
+        "message": "🧠 Claude"
+    },
+    "actionNameGemini": {
+        "message": "✨ Gemini"
+    },
+    "nameReddit": {
+        "message": "Recherche Reddit"
+    },
+    "nameChatGPT": {
+        "message": "ChatGPT"
+    },
+    "nameClaude": {
+        "message": "Claude"
+    },
+    "nameGemini": {
+        "message": "Gemini"
+    },
+    "actionNameCopy": {
+        "message": "📋 Copier"
+    },
+    "toastCopied": {
+        "message": "📋 Copié !"
+    },
+    "guideCloseTitle": {
+        "message": "Fermer le guide"
+    }
+}
