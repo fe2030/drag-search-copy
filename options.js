@@ -13,7 +13,9 @@ const DEFAULT_SETTINGS = {
   // 大きくドラッグ機能のオン/オフ
   farDragEnabled: false,
   // 視覚ガイドのオン/オフ
-  enableGuides: true
+  enableGuides: true,
+  // ペーストボタンのオン/オフ
+  enablePasteButton: true
 };
 
 // DOM要素 - 通常のドラッグ
@@ -34,6 +36,7 @@ const statusMessage = document.getElementById('statusMessage');
 const dragToggle = document.getElementById('dragToggle');
 const farDragCheckbox = document.getElementById('farDragCheckbox');
 const enableGuidesCheckbox = document.getElementById('enableGuidesCheckbox');
+const enablePasteButtonCheckbox = document.getElementById('enablePasteButtonCheckbox');
 const resetButton = document.getElementById('resetButton');
 
 let farDragSections = null;
@@ -155,6 +158,11 @@ function applySettingsToUI(settings) {
   if (enableGuidesCheckbox) {
     enableGuidesCheckbox.checked = settings.enableGuides !== undefined ? settings.enableGuides : DEFAULT_SETTINGS.enableGuides;
   }
+
+  // ペーストボタンの状態を反映
+  if (enablePasteButtonCheckbox) {
+    enablePasteButtonCheckbox.checked = settings.enablePasteButton !== undefined ? settings.enablePasteButton : DEFAULT_SETTINGS.enablePasteButton;
+  }
 }
 
 // 設定を保存
@@ -173,7 +181,9 @@ function saveSettings() {
     // 大きくドラッグ機能のオン/オフ
     farDragEnabled: getFarDragEnabled(),
     // 視覚ガイドのオン/オフ
-    enableGuides: enableGuidesCheckbox ? enableGuidesCheckbox.checked : DEFAULT_SETTINGS.enableGuides
+    enableGuides: enableGuidesCheckbox ? enableGuidesCheckbox.checked : DEFAULT_SETTINGS.enableGuides,
+    // ペーストボタンのオン/オフ
+    enablePasteButton: enablePasteButtonCheckbox ? enablePasteButtonCheckbox.checked : DEFAULT_SETTINGS.enablePasteButton
   };
 
   try {
@@ -368,6 +378,22 @@ document.addEventListener('DOMContentLoaded', () => {
       // 設定を即座に保存
       chrome.storage.sync.get(DEFAULT_SETTINGS, (settings) => {
         const updatedSettings = { ...settings, enableGuides: enabled };
+        chrome.storage.sync.set(updatedSettings, () => {
+          if (chrome.runtime.lastError) {
+            console.error('設定の保存に失敗:', chrome.runtime.lastError);
+          }
+        });
+      });
+    });
+  }
+
+  // ペーストボタンチェックボックスのイベントリスナー
+  if (enablePasteButtonCheckbox) {
+    enablePasteButtonCheckbox.addEventListener('change', (e) => {
+      const enabled = e.target.checked;
+      // 設定を即座に保存
+      chrome.storage.sync.get(DEFAULT_SETTINGS, (settings) => {
+        const updatedSettings = { ...settings, enablePasteButton: enabled };
         chrome.storage.sync.set(updatedSettings, () => {
           if (chrome.runtime.lastError) {
             console.error('設定の保存に失敗:', chrome.runtime.lastError);

@@ -172,5 +172,20 @@
     },
     "guideCloseTitle": {
         "message": "Cerrar guía"
+    },
+    "enablePasteButtonLabel": {
+        "message": "Mostrar botón Pegar:"
+    },
+    "enablePasteButtonDesc": {
+        "message": "Muestra un botón Pegar al enfocar campos de texto"
+    },
+    "pasteButtonLabel": {
+        "message": "📋 Pegar"
+    },
+    "toastClipboardEmpty": {
+        "message": "Portapapeles vacío"
+    },
+    "toastPasteFailed": {
+        "message": "Error al pegar"
     }
 }

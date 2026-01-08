@@ -172,5 +172,20 @@
     },
     "guideCloseTitle": {
         "message": "Fermer le guide"
+    },
+    "enablePasteButtonLabel": {
+        "message": "Afficher le bouton Coller :"
+    },
+    "enablePasteButtonDesc": {
+        "message": "Affiche un bouton Coller lors du focus sur les champs de texte"
+    },
+    "pasteButtonLabel": {
+        "message": "📋 Coller"
+    },
+    "toastClipboardEmpty": {
+        "message": "Presse-papiers vide"
+    },
+    "toastPasteFailed": {
+        "message": "Échec du collage"
     }
 }

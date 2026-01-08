@@ -172,5 +172,20 @@
     },
     "guideCloseTitle": {
         "message": "Chiudi guida"
+    },
+    "enablePasteButtonLabel": {
+        "message": "Mostra pulsante Incolla:"
+    },
+    "enablePasteButtonDesc": {
+        "message": "Mostra un pulsante Incolla quando si focalizzano i campi di testo"
+    },
+    "pasteButtonLabel": {
+        "message": "📋 Incolla"
+    },
+    "toastClipboardEmpty": {
+        "message": "Appunti vuoti"
+    },
+    "toastPasteFailed": {
+        "message": "Incolla fallito"
     }
 }

@@ -10,7 +10,8 @@
         leftFar: 'none',
         rightFar: 'none',
         farDragEnabled: false,
-        enableGuides: true
+        enableGuides: true,
+        enablePasteButton: true
     };
 
     let settings = { ...DEFAULT_SETTINGS };
@@ -497,6 +498,231 @@
         }
     }
 
+    // ===== ペーストボタン機能 =====
+
+    // Extension context が有効かどうかをチェック
+    function isExtensionValid() {
+        try {
+            return !!(chrome.runtime && chrome.runtime.id);
+        } catch (e) {
+            return false;
+        }
+    }
+
+    // 安全に i18n メッセージを取得
+    function safeGetMessage(key, fallback) {
+        if (!isExtensionValid()) return fallback;
+        try {
+            return chrome.i18n.getMessage(key) || fallback;
+        } catch (e) {
+            return fallback;
+        }
+    }
+
+    let pasteButtonHost = null;
+    let pasteButtonRoot = null;
+    let currentFocusedElement = null;
+    let focusTimeout = null;
+    let blurTimeout = null;
+
+    function isPasteTargetElement(element) {
+        if (!element || element.nodeType !== 1) return false;
+
+        // input要素のチェック
+        if (element.tagName === 'INPUT') {
+            const type = element.type.toLowerCase();
+            const allowedTypes = ['text', 'search', 'url', 'email', 'tel', 'password', 'number'];
+            return allowedTypes.includes(type);
+        }
+
+        // textarea要素
+        if (element.tagName === 'TEXTAREA') return true;
+
+        // contentEditable要素
+        if (element.contentEditable === 'true') return true;
+
+        return false;
+    }
+
+    function createPasteButton(targetElement) {
+        if (!settings.enablePasteButton) return;
+        if (pasteButtonHost) return;
+        if (guideOverlayHost) return; // 視覚ガイドが表示されている場合は非表示
+
+        const rect = targetElement.getBoundingClientRect();
+
+        // ボタン位置: テキストボックスの左下（5px下にオフセット）
+        const buttonX = rect.left + window.scrollX;
+        const buttonY = rect.bottom + window.scrollY + 5;
+
+        pasteButtonHost = document.createElement('div');
+        pasteButtonHost.id = 'superdrag-paste-button';
+        pasteButtonHost.style.cssText = `
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 0 !important;
+            height: 0 !important;
+            z-index: 2147483647 !important;
+            pointer-events: none !important;
+            overflow: visible !important;
+        `;
+        document.body.appendChild(pasteButtonHost);
+
+        pasteButtonRoot = pasteButtonHost.attachShadow({ mode: 'open' });
+
+        const style = document.createElement('style');
+        style.textContent = `
+            .paste-button {
+                position: absolute;
+                background: linear-gradient(135deg, #4a90d9, #357abd);
+                color: white;
+                padding: 6px 12px;
+                border-radius: 6px;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-size: 13px;
+                font-weight: 500;
+                white-space: nowrap;
+                cursor: pointer;
+                pointer-events: auto;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+                opacity: 0;
+                transform: scale(0.9);
+                transition: opacity 0.15s ease-out, transform 0.15s ease-out, background 0.15s ease, box-shadow 0.15s ease;
+                user-select: none;
+            }
+            .paste-button.visible {
+                opacity: 1;
+                transform: scale(1);
+            }
+            .paste-button:hover {
+                background: linear-gradient(135deg, #357abd, #2d6cb5);
+                box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+                transform: scale(1.02);
+            }
+            .paste-button:active {
+                transform: scale(0.98);
+            }
+        `;
+        pasteButtonRoot.appendChild(style);
+
+        const button = document.createElement('div');
+        button.className = 'paste-button';
+        button.textContent = safeGetMessage('pasteButtonLabel', '📋 Paste');
+        button.style.left = buttonX + 'px';
+        button.style.top = buttonY + 'px';
+
+        button.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+        });
+
+        button.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            await handlePaste(targetElement);
+            removePasteButton();
+        });
+
+        pasteButtonRoot.appendChild(button);
+
+        requestAnimationFrame(() => {
+            button.classList.add('visible');
+        });
+    }
+
+    function removePasteButton() {
+        if (pasteButtonHost) {
+            if (pasteButtonHost.parentNode) {
+                pasteButtonHost.parentNode.removeChild(pasteButtonHost);
+            }
+            pasteButtonHost = null;
+            pasteButtonRoot = null;
+        }
+    }
+
+    async function handlePaste(targetElement) {
+        try {
+            const text = await navigator.clipboard.readText();
+
+            if (!text || text.length === 0) {
+                // クリップボードが空
+                const rect = targetElement.getBoundingClientRect();
+                showToast(rect.left, rect.bottom + 10, safeGetMessage('toastClipboardEmpty', 'Clipboard is empty'));
+                return;
+            }
+
+            // 貼り付け処理
+            if (targetElement.tagName === 'INPUT' || targetElement.tagName === 'TEXTAREA') {
+                const start = targetElement.selectionStart || 0;
+                const end = targetElement.selectionEnd || 0;
+                const before = targetElement.value.substring(0, start);
+                const after = targetElement.value.substring(end);
+                targetElement.value = before + text + after;
+                targetElement.selectionStart = targetElement.selectionEnd = start + text.length;
+
+                // イベント発火
+                targetElement.dispatchEvent(new Event('input', { bubbles: true }));
+                targetElement.dispatchEvent(new Event('change', { bubbles: true }));
+            } else if (targetElement.contentEditable === 'true') {
+                // contentEditable の場合
+                targetElement.focus();
+                document.execCommand('insertText', false, text);
+            }
+
+            // 成功時はトーストなし（静かに成功）
+
+        } catch (err) {
+            // 貼り付け失敗
+            const rect = targetElement.getBoundingClientRect();
+            showToast(rect.left, rect.bottom + 10, safeGetMessage('toastPasteFailed', 'Paste failed'));
+        }
+    }
+
+    function handleFocusIn(e) {
+        const target = e.target;
+
+        if (!isPasteTargetElement(target)) return;
+        if (!settings.enablePasteButton) return;
+
+        // 既存のタイマーをクリア
+        if (blurTimeout) {
+            clearTimeout(blurTimeout);
+            blurTimeout = null;
+        }
+
+        currentFocusedElement = target;
+
+        // 100ms 遅延後にボタンを表示
+        focusTimeout = setTimeout(() => {
+            if (currentFocusedElement === target && !guideOverlayHost) {
+                createPasteButton(target);
+            }
+        }, 100);
+    }
+
+    function handleFocusOut(e) {
+        const target = e.target;
+
+        if (!isPasteTargetElement(target)) return;
+
+        // タイマーをクリア
+        if (focusTimeout) {
+            clearTimeout(focusTimeout);
+            focusTimeout = null;
+        }
+
+        // 100ms 遅延後にボタンを非表示（ボタンクリック時のため）
+        blurTimeout = setTimeout(() => {
+            if (currentFocusedElement === target) {
+                removePasteButton();
+                currentFocusedElement = null;
+            }
+        }, 100);
+    }
+
+    // ===== ペーストボタン機能 ここまで =====
+
     function init() {
         if (!document.body) {
             setTimeout(init, 100);
@@ -514,6 +740,10 @@
         document.addEventListener('mousedown', handleMouseDown);
         document.addEventListener('selectionchange', handleSelectionChange);
         document.addEventListener('keydown', handleKeyDown);
+
+        // ペーストボタン用イベント
+        document.addEventListener('focusin', handleFocusIn);
+        document.addEventListener('focusout', handleFocusOut);
     }
 
     init();

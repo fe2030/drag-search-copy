@@ -172,5 +172,20 @@
     },
     "guideCloseTitle": {
         "message": "Anleitung schließen"
+    },
+    "enablePasteButtonLabel": {
+        "message": "Einfügen-Button anzeigen:"
+    },
+    "enablePasteButtonDesc": {
+        "message": "Zeigt einen Einfügen-Button beim Fokussieren von Textfeldern an"
+    },
+    "pasteButtonLabel": {
+        "message": "📋 Einfügen"
+    },
+    "toastClipboardEmpty": {
+        "message": "Zwischenablage ist leer"
+    },
+    "toastPasteFailed": {
+        "message": "Einfügen fehlgeschlagen"
     }
 }

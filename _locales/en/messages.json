@@ -172,5 +172,20 @@
     },
     "guideCloseTitle": {
         "message": "Close Guide"
+    },
+    "enablePasteButtonLabel": {
+        "message": "Show Paste Button:"
+    },
+    "enablePasteButtonDesc": {
+        "message": "Show a paste button when focusing on text input fields"
+    },
+    "pasteButtonLabel": {
+        "message": "📋 Paste"
+    },
+    "toastClipboardEmpty": {
+        "message": "Clipboard is empty"
+    },
+    "toastPasteFailed": {
+        "message": "Paste failed"
     }
 }

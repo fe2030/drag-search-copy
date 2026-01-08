@@ -172,5 +172,20 @@
     },
     "guideCloseTitle": {
         "message": "ガイドを閉じる"
+    },
+    "enablePasteButtonLabel": {
+        "message": "ペーストボタンを表示する:"
+    },
+    "enablePasteButtonDesc": {
+        "message": "テキスト入力欄にフォーカスした際にペーストボタンを表示します"
+    },
+    "pasteButtonLabel": {
+        "message": "📋 貼り付け"
+    },
+    "toastClipboardEmpty": {
+        "message": "クリップボードが空です"
+    },
+    "toastPasteFailed": {
+        "message": "貼り付けに失敗しました"
     }
 }

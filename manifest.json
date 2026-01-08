@@ -1,11 +1,10 @@
 {
   "manifest_version": 3,
   "name": "__MSG_appName__",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "default_locale": "ja",
   "description": "__MSG_appDesc__",
   "permissions": [
-    "tabs",
     "storage",
     "scripting",
     "clipboardWrite"
