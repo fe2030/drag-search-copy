@@ -20,6 +20,7 @@
     let dragStartTime = null;
     let hasTextSelection = false;
     let isFromInteractiveElement = false;
+    let mouseDownPoint = null;
 
     const THRESHOLD = 4;
     const FAR_THRESHOLD = 100;
@@ -84,6 +85,116 @@
     function isInputElement(element) {
         if (!element || element.nodeType !== 1) return false;
         return element.tagName === 'INPUT' || element.tagName === 'TEXTAREA' || element.isContentEditable;
+    }
+
+    // input/textarea から選択テキストを安全に取得
+    // selectionStart 非対応の input type（number 等）では例外をキャッチして空文字を返す
+    function getInputSelectedText(element) {
+        try {
+            const start = element.selectionStart;
+            const end = element.selectionEnd;
+            if (start === null || end === null || start === end) return '';
+            return element.value.substring(start, end);
+        } catch (e) {
+            return '';
+        }
+    }
+
+    // ミラー要素テクニックで input/textarea 内の選択テキストのビューポート座標を取得
+    // 不可視の div を作成し、対象要素と同じスタイル・位置で配置して選択部分の座標を計測する
+    function getInputSelectionCoords(element) {
+        try {
+            const start = element.selectionStart;
+            const end = element.selectionEnd;
+            if (start === null || end === null || start === end) return null;
+
+            const isInput = element.tagName === 'INPUT';
+            const computed = window.getComputedStyle(element);
+            const elemRect = element.getBoundingClientRect();
+
+            // ミラー要素を作成
+            const mirror = document.createElement('div');
+
+            // テキストレイアウトに影響するスタイルをコピー
+            const properties = [
+                'fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'fontVariant',
+                'letterSpacing', 'wordSpacing', 'textTransform', 'textIndent',
+                'lineHeight',
+                'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
+                'borderTopWidth', 'borderRightWidth', 'borderBottomWidth', 'borderLeftWidth',
+                'borderTopStyle', 'borderRightStyle', 'borderBottomStyle', 'borderLeftStyle',
+                'direction', 'textAlign'
+            ];
+
+            for (var i = 0; i < properties.length; i++) {
+                mirror.style[properties[i]] = computed[properties[i]];
+            }
+
+            // 対象要素と同じ位置・サイズで fixed 配置（スクロールの影響を受けない）
+            // elemRect.width/height は常に border-box 幅なので、boxSizing を border-box に固定することで
+            // computed.width の box-sizing 依存によるズレを防ぐ
+            mirror.style.position = 'fixed';
+            mirror.style.top = elemRect.top + 'px';
+            mirror.style.left = elemRect.left + 'px';
+            mirror.style.boxSizing = 'border-box';
+            mirror.style.width = elemRect.width + 'px';
+            mirror.style.height = elemRect.height + 'px';
+            mirror.style.overflow = 'hidden';
+            mirror.style.visibility = 'hidden';
+            mirror.style.pointerEvents = 'none';
+            mirror.style.zIndex = '-9999';
+
+            // input は単一行（折り返しなし）、textarea は複数行（折り返しあり）
+            if (isInput) {
+                mirror.style.whiteSpace = 'pre';
+            } else {
+                mirror.style.whiteSpace = 'pre-wrap';
+                mirror.style.wordWrap = 'break-word';
+            }
+
+            // テキスト内容を構築: [選択前テキスト][選択テキスト(span)]
+            // afterText は座標計算に不要なので省略（パフォーマンス向上）
+            var value = element.value;
+            var beforeNode = document.createTextNode(value.substring(0, start));
+            var selectedSpan = document.createElement('span');
+            selectedSpan.textContent = value.substring(start, end);
+
+            mirror.appendChild(beforeNode);
+            mirror.appendChild(selectedSpan);
+
+            document.body.appendChild(mirror);
+
+            // 対象要素内部のスクロール位置を同期
+            if (isInput) {
+                mirror.scrollLeft = element.scrollLeft;
+            } else {
+                mirror.scrollTop = element.scrollTop;
+                mirror.scrollLeft = element.scrollLeft;
+            }
+
+            // 選択テキスト span の座標を取得
+            var spanRect = selectedSpan.getBoundingClientRect();
+
+            // DOM から削除する前に値をコピー（削除後は rect が無効になる可能性がある）
+            var result = {
+                left: spanRect.left,
+                top: spanRect.top,
+                right: spanRect.right,
+                bottom: spanRect.bottom,
+                width: spanRect.width,
+                height: spanRect.height
+            };
+
+            // ミラー要素をクリーンアップ
+            document.body.removeChild(mirror);
+
+            // 座標が有効かチェック（画面外やゼロサイズの場合は null）
+            if (result.width <= 0 || result.height <= 0) return null;
+
+            return result;
+        } catch (e) {
+            return null;
+        }
     }
 
     function getDirection(p1, p2) {
@@ -185,6 +296,7 @@
 
         if (!settings.enableGuides) return;
         if (guideOverlayHost) return;
+        if (!isExtensionValid()) return;
 
         guideOverlayHost = document.createElement('div');
         guideOverlayHost.id = 'superdrag-guide-overlay';
@@ -283,7 +395,7 @@
         const closeBtn = document.createElement('div');
         closeBtn.className = 'guide-close';
         closeBtn.innerHTML = '&#xd7;';
-        closeBtn.title = chrome.i18n.getMessage('guideCloseTitle');
+        closeBtn.title = safeGetMessage('guideCloseTitle', 'Close');
         closeBtn.style.left = (x + 70) + 'px';
         closeBtn.style.top = (y - 80) + 'px';
 
@@ -305,7 +417,7 @@
             if (actionId === 'none') return;
 
             const i18nKey = ACTION_DISPLAY_NAMES[actionId];
-            const displayText = i18nKey ? chrome.i18n.getMessage(i18nKey) : actionId;
+            const displayText = i18nKey ? safeGetMessage(i18nKey, actionId) : actionId;
             const label = document.createElement('div');
             label.className = `guide-label ${isFar ? 'far' : ''}`;
             label.textContent = displayText;
@@ -365,7 +477,27 @@
 
     function handleDragStart(e) {
         const target = e.target;
-        if (isInputElement(target)) return;
+
+        // input/textarea の場合: selectionStart/selectionEnd で選択テキストを取得
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+            const inputSelection = getInputSelectedText(target);
+            if (!inputSelection) return;
+
+            hasTextSelection = true;
+            isFromInteractiveElement = false;
+            e.dataTransfer.setData('text/plain', inputSelection);
+            dragStartPoint = { x: e.clientX, y: e.clientY };
+            dragStartTime = Date.now();
+            currentDirection = null;
+
+            // ドラッグ開始時にガイドとペーストボタンを非表示
+            removeGuideOverlay();
+            removePasteButton();
+            return;
+        }
+
+        // contentEditable はスキップ（リッチテキストエディタとの競合防止）
+        if (target.isContentEditable) return;
 
         const selection = window.getSelection().toString();
         hasTextSelection = !!selection;
@@ -453,13 +585,64 @@
         if (dragStartPoint) return;
         if (guideManuallyHidden) return;
 
+        // クリック（ほぼ移動なし）かドラッグ選択かを判定
+        const isClick = mouseDownPoint &&
+            Math.abs(e.clientX - mouseDownPoint.x) < THRESHOLD &&
+            Math.abs(e.clientY - mouseDownPoint.y) < THRESHOLD;
+        mouseDownPoint = null;
+
+        // クリックの場合、既存のガイドを移動させない（新規選択ではない）
+        if (isClick) return;
+
         setTimeout(() => {
+            const target = e.target;
+
+            // ===== Case 1: input/textarea 内の選択 =====
+            // window.getSelection() では取得できないため、独自に処理する
+            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+                const text = getInputSelectedText(target);
+                if (text && text.trim().length > 0) {
+                    // ペーストボタンと視覚ガイドの重複を防止
+                    removePasteButton();
+                    removeGuideOverlay();
+
+                    const elemRect = target.getBoundingClientRect();
+                    const isTextarea = target.tagName === 'TEXTAREA';
+                    const mirrorRect = getInputSelectionCoords(target);
+
+                    let centerX, centerY;
+                    if (mirrorRect) {
+                        // 水平: ミラーの選択テキスト中央
+                        centerX = mirrorRect.left + mirrorRect.width / 2 + window.scrollX;
+                        // 垂直: input は要素の垂直中央を使用（単一行で安定）、textarea はミラーの垂直中央
+                        centerY = isTextarea
+                            ? (mirrorRect.top + mirrorRect.height / 2 + window.scrollY)
+                            : (elemRect.top + elemRect.height / 2 + window.scrollY);
+                    } else {
+                        // フォールバック: 要素の中央
+                        centerX = elemRect.left + elemRect.width / 2 + window.scrollX;
+                        centerY = elemRect.top + elemRect.height / 2 + window.scrollY;
+                    }
+                    createGuideOverlay(centerX, centerY, text);
+                }
+                return;
+            }
+
+            // ===== Case 2: 通常テキスト / contentEditable =====
             const selection = window.getSelection();
             const text = selection ? selection.toString() : '';
             if (text.trim().length > 0) {
                 try {
                     const range = selection.getRangeAt(0);
                     const rect = range.getBoundingClientRect();
+
+                    // ゼロ矩形チェック（Shadow DOM 等で位置が取得できない場合）
+                    if (rect.width === 0 && rect.height === 0) {
+                        removeGuideOverlay();
+                        createGuideOverlay(e.clientX + window.scrollX, e.clientY + window.scrollY, text);
+                        return;
+                    }
+
                     // ページ座標を使用（スクロール位置を加算）
                     const centerX = rect.left + rect.width / 2 + window.scrollX;
                     const centerY = rect.top + rect.height / 2 + window.scrollY;
@@ -475,15 +658,30 @@
 
     function handleMouseDown(e) {
         if (dragStartPoint) return;
-        const selection = window.getSelection();
-        if (selection && selection.toString().length > 0) {
+        mouseDownPoint = { x: e.clientX, y: e.clientY };
+
+        // ガイドが表示中ならクリックで閉じる
+        // （ガイドのボタンは stopPropagation するのでここには到達しない）
+        if (guideOverlayHost) {
+            removeGuideOverlay();
             return;
         }
-        removeGuideOverlay();
     }
 
     function handleSelectionChange(e) {
         if (dragStartPoint) return;
+
+        // input/textarea 内でテキストが選択されている間はガイドを維持する
+        // （window.getSelection() は input/textarea 内の選択を反映しないため、
+        //  チェックしないとガイドが即座に削除されてしまう）
+        const activeEl = document.activeElement;
+        if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA')) {
+            const inputText = getInputSelectedText(activeEl);
+            if (inputText && inputText.length > 0) {
+                return;
+            }
+        }
+
         const selection = window.getSelection();
         if (!selection || selection.toString().length === 0) {
             removeGuideOverlay();
